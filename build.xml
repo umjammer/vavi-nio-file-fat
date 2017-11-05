@@ -7,46 +7,50 @@
 <!--                                                                        -->
 <!-- fat32                                                                  -->
 <!--                                                                        -->
-<!-- @author	Naohide Sano                                                -->
-<!-- @version	0.00	060108	nsano	initial version                     -->
+<!-- @author Naohide Sano                                                   -->
+<!-- @version 0.00 060108 nsano initial version                             -->
 <!--                                                                        -->
 <!-- ////////////////////////////////////////////////////////////////////// -->
 
-<project default="run" basedir=".">
+<project name="vavi-apps-fat32" default="run" basedir="."
+  xmlns:artifact="urn:maven-artifact-ant">
 
-  <property environment="env"/>
-  <property file="local.properties" />
-  <property file="${vavi.dir}/java/local.properties" />
-
-  <property name="windows.home" value="${dir.windows}/system32" />
-  <property name="jdk.home" value="c:/usr/local/java" />
-  <property name="cygwin.home" value="c:/usr/local/cygwin" />
-  <property name="mingw.include" value="${cygwin.home}/usr/include/mingw" />
-  <property name="w32api.include" value="${cygwin.home}/usr/include/w32api" />
-  <property name="mingw.lib" value="${cygwin.home}/lib/mingw" />
-  <property name="dir.native" value="src/vavix/io" />
-
-  <property name="dir.build" value="build" />
-
-  <!-- クラスパスの定義 -->
-  <path id="project.class.path">
-    <pathelement location="${vavi.dir}/java" />
-    <pathelement location="${dir.build}" />
-    <fileset dir="lib">
+  <path id="maven-ant-tasks.classpath">
+    <fileset dir="${user.home}/lib/java/maven-ant-tasks">
       <include name="*.jar" />
     </fileset>
   </path>
+  <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+           uri="urn:maven-artifact-ant"
+           classpathref="maven-ant-tasks.classpath" />
 
-  <path id="test.class.path">
-    <pathelement location="test" />
-    <path refid="project.class.path" />
+  <property environment="env" />
+  <property file="local.properties" />
+
+  <xmlproperty file="pom.xml" />
+
+  <!-- Path Definitions -->
+  <path id="project.class.path">
+    <pathelement location="${javac.dest.test}" />
+    <pathelement location="${javac.dest}" />
+    <fileset refid="maven-ant-tasks.dependency.fileset" />
   </path>
 
-  <!-- ターゲットの定義 -->
+  <!-- prepare -->
+  <target name="prepare" description="Preparing">
+    <artifact:pom file="pom.xml" id="maven.project" />
+    <artifact:dependencies fileSetId="maven-ant-tasks.dependency.fileset">
+      <pom refid="maven.project" />
+    </artifact:dependencies>
+    <artifact:mvn pom="pom.xml">
+      <arg value="clean"/>
+      <arg value="package"/>
+      <arg value="-Dmaven.test.skip=true"/>
+    </artifact:mvn>
+  </target>
 
   <!-- clean -->
   <target name="clean" description="ビルド環境のクリア">
-    <delete dir="${dir.build}" />
     <delete file="lib/RawIO.dll" />
     <delete>
       <fileset dir="${dir.native}">
@@ -56,27 +60,8 @@
     </delete>
   </target>
 
-  <!-- prepare -->
-  <target name="prepare" description="準備">
-    <mkdir dir="lib" />
-    <mkdir dir="${dir.build}" />
-    <mkdir dir="${dir.build}/resources" />
-    <mkdir dir="${dir.build}/META-INF/services" />
-  </target>
-
-  <!-- javac -->
-  <target name="compile" depends="prepare"
-          description="コンパイル">
-    <javac debug="on" deprecation="true" destdir="${dir.build}">
-      <classpath refid="project.class.path" />
-      <include name="**/*.java" />
-      <src path="src" />
-    </javac>
-
-  </target>
-
   <!-- javah -->
-  <target name="javah" depends="compile" description="Makeing Header">
+  <target name="javah" depends="prepare" description="Makeing Header">
     <javah destdir="${dir.native}">
       <classpath refid="project.class.path" />
       <class name="vavix.io.RawIO" />
