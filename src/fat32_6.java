@@ -81,7 +81,7 @@ public class fat32_6 {
 //                int targetCluster = startCluster + cluster;
 //System.err.print("cluster: " + targetCluster);
 //
-//                // “rØ‚ê‚½‚çŸ‚Ìg‚í‚ê‚Ä‚¢‚È‚¢‚Æ‚±‚ë
+//                // é€”åˆ‡ã‚ŒãŸã‚‰æ¬¡ã®ä½¿ã‚ã‚Œã¦ã„ãªã„ã¨ã“ã‚
 //
 //                if (isUsing(fat32, targetCluster)) {
 //System.err.println(" has used, skip");
@@ -98,6 +98,7 @@ public class fat32_6 {
 //    };
 
     /** */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     fat32_6(String[] args) throws Exception {
         String deviceName = args[0];
         this.fat32 = new Fat32(deviceName);
@@ -106,7 +107,7 @@ public class fat32_6 {
         List<DeletedDirectoryEntry> deletedEntries;
         if (!cache.exists()) {
             String path = deviceName;
-            deletedEntries = new ArrayList<DeletedDirectoryEntry>();
+            deletedEntries = new ArrayList<>();
             dig(path, deletedEntries);
 
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cache));
@@ -124,8 +125,8 @@ public class fat32_6 {
 System.err.printf("%tF, %tF, %tF: %s, %d\n", entry.lastAccessed(), entry.lastModified(), entry.created(), entry.getName(), entry.getStartCluster());
         }
 
-        // + ©•ª‚ªíœ‚³‚ê‚½ lastAccessed() ‚æ‚è‘O‚Éì‚ç‚ê‚½ lastCreated()
-        // - ©•ª‚ªíœ‚³‚ê‚½ lastAccessed() ‚æ‚è‘O‚Éíœ‚³‚ê‚½
+        // + è‡ªåˆ†ãŒå‰Šé™¤ã•ã‚ŒãŸ lastAccessed() ã‚ˆã‚Šå‰ã«ä½œã‚‰ã‚ŒãŸ lastCreated()
+        // - è‡ªåˆ†ãŒå‰Šé™¤ã•ã‚ŒãŸ lastAccessed() ã‚ˆã‚Šå‰ã«å‰Šé™¤ã•ã‚ŒãŸ
     }
  
     /** */

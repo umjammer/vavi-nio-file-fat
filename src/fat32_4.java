@@ -50,7 +50,7 @@ public class fat32_4 {
             int startCluster = scanner.nextInt();
             int size = scanner.nextInt();
 System.err.println("startCluster: " + startCluster + ", size: " + size);
-            List<Integer> clusters = new ArrayList<Integer>(); 
+            List<Integer> clusters = new ArrayList<>(); 
             for (int i = 0; i < fat32.getRequiredClusters(size); i++) {
                 clusters.add(startCluster + i);
             }
@@ -66,7 +66,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size);
             int lastCluster = scanner.nextInt();
             int size2nd = scanner.nextInt();
 System.err.println("startCluster: " + startCluster + ", size: " + size + ", lastCluster: "+ lastCluster + ", size2nd: " + size2nd);
-            List<Integer> clusters = new ArrayList<Integer>(); 
+            List<Integer> clusters = new ArrayList<>(); 
             int size1st = size - size2nd;
             int l = fat32.getRequiredClusters(size1st);
             for (int i = 0; i < l; i++) {
@@ -134,6 +134,7 @@ System.err.println("cluster: " + i + ": " + c + "\n" + StringUtil.getDump(buffer
                 }
             }
         }
+        scanner.close();
     }
 
     //-------------------------------------------------------------------------
@@ -157,7 +158,7 @@ System.err.println("cluster: " + i + ": " + c + "\n" + StringUtil.getDump(buffer
             int size = scanner.nextInt(); // full size
 System.err.println("lastCluster: " + lastCluster + ", clusters: " + clusters + ", size: " + size);
 
-            List<Integer> clusterList = new ArrayList<Integer>();
+            List<Integer> clusterList = new ArrayList<>();
             for (int i = lastCluster; i > 2; i--) {
                 if (fat32.isUsing(i)) {
 System.err.println("\nnot continued, stop");
@@ -207,6 +208,7 @@ System.err.println(" 2nd parts salvaged, finish: " + ((clusterList.size() - 1) *
             output.renameTo(new File(dir, String.valueOf(lastCluster) + ".incomplete"));
 //}
         }
+        scanner.close();
     }
 
     //-------------------------------------------------------------------------
@@ -228,7 +230,7 @@ System.err.println(" 2nd parts salvaged, finish: " + ((clusterList.size() - 1) *
             int size = scanner.nextInt();
 System.err.println("lastCluster: " + lastCluster + ", clusters: " + clusters + ", size: " + size);
 
-            List<Integer> clusterList = new ArrayList<Integer>();
+            List<Integer> clusterList = new ArrayList<>();
             boolean continued = true;
             for (int i = lastCluster; i > 2; i--) {
                 if (fat32.isUsing(i)) {
@@ -296,6 +298,7 @@ System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valu
             }
 }
         }
+        scanner.close();
     }
 
     //-------------------------------------------------------------------------
@@ -322,7 +325,7 @@ System.err.println("----");
             int size = scanner.nextInt();
 System.err.println("lastCluster: " + lastCluster + ", clusters: " + clusters + ", size: " + size);
 
-            List<Integer> clusterList = new ArrayList<Integer>();
+            List<Integer> clusterList = new ArrayList<>();
             boolean continued = true;
             for (int i = lastCluster; i > 2; i--) {
                 if (fat32.isUsing(i)) {
@@ -371,6 +374,7 @@ System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valu
             }
 //}
         }
+        scanner.close();
     }
 
     //-------------------------------------------------------------------------
@@ -436,6 +440,7 @@ System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valu
             }
 //}
         }
+        scanner.close();
     }
 }
 

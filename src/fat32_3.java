@@ -43,7 +43,7 @@ System.err.println("file: " + file);
         Scanner scanner = new Scanner(new FileInputStream(file));
         boolean found = false;
         byte[] buffer = new byte[fat32.getBytesPerSector()]; 
-outer:
+//outer:
         while (scanner.hasNextInt()) {
             int lastCluster = scanner.nextInt();
 
@@ -66,6 +66,7 @@ System.err.println("found at cluster: " + lastCluster + "\n" + StringUtil.getDum
                 }
             }
         }
+        scanner.close();
         if (!found) {
             System.err.println("not found");
         }
@@ -97,7 +98,7 @@ System.err.print("cluster: " + startCluster);
                     fat32.readSector(buffer, targetSector);
                     if (buffer[0] == 'I' && buffer[1] == 'D' && buffer[2] == '3') {
         
-                        // égÇÌÇÍÇƒÇ¢ÇΩÇÁéü
+                        // ‰Ωø„Çè„Çå„Å¶„ÅÑ„Åü„ÇâÊ¨°
         
                         if (!fat32.isUsing(startCluster)) {
 System.err.println("startCluster: " + startCluster + ", startClusterHigh: " + i + "\n" + StringUtil.getDump(buffer));
@@ -108,6 +109,7 @@ System.err.println(", startClusterHigh: " + i + "\n" + StringUtil.getDump(buffer
                 }
             }
         }
+        reader.close();
     }
 
     //-------------------------------------------------------------------------
@@ -135,6 +137,7 @@ System.err.println(entry.getName() + "\n" + StringUtil.paramString(entry));
 System.err.println("not found: " + file);
             }
         }
+        reader.close();
     }
 }
 

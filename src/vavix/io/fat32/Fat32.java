@@ -51,27 +51,27 @@ public class Fat32 implements Serializable {
     public class BPB implements Serializable {
         /** */
         private static final long serialVersionUID = -1066456664696979810L;
-        /** OEM ƒ‰ƒxƒ‹–¼ */
+        /** OEM ãƒ©ãƒ™ãƒ«å */
         String oemLavel;
-        /** ˜_—ƒZƒNƒ^ƒTƒCƒY */
+        /** è«–ç†ã‚»ã‚¯ã‚¿ã‚µã‚¤ã‚º */
         public int bytesPerSector;
-        /** 1ƒNƒ‰ƒXƒ^(ƒAƒƒP[ƒVƒ‡ƒ“ƒ†ƒjƒbƒg)‚ ‚½‚è‚ÌƒZƒNƒ^” */
+        /** 1ã‚¯ãƒ©ã‚¹ã‚¿(ã‚¢ãƒ­ã‚±ãƒ¼ã‚·ãƒ§ãƒ³ãƒ¦ãƒ‹ãƒƒãƒˆ)ã‚ãŸã‚Šã®ã‚»ã‚¯ã‚¿æ•° */
         public int sectorsPerCluster;
-        /** —\–ñƒZƒNƒ^” */
+        /** äºˆç´„ã‚»ã‚¯ã‚¿æ•° */
         int reservedSectors;
-        /** FAT ‚Ì” */
+        /** FAT ã®æ•° */
         int numberOfFAT;
         /**
-         * ƒ‹[ƒgƒfƒBƒŒƒNƒgƒŠƒGƒ“ƒgƒŠ‚ÌÅ‘å”
-         * FAT12/16 —p‚Å‚ ‚èCFAT32 ‚Å‚Íí‚É 0000h
+         * ãƒ«ãƒ¼ãƒˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚¨ãƒ³ãƒˆãƒªã®æœ€å¤§æ•°
+         * FAT12/16 ç”¨ã§ã‚ã‚Šï¼ŒFAT32 ã§ã¯å¸¸ã« 0000h
          */
         int maxRootDirectoryEntries;
         /**
-         * ‘SƒZƒNƒ^”(Small Sector)
-         * FAT32 ‚Å‚Íí‚É 0000h B‘SƒZƒNƒ^”‚ª WORD(2ƒoƒCƒg) ‚Å•\‚³‚ê‚éê‡‚Ì‚İ
+         * å…¨ã‚»ã‚¯ã‚¿æ•°(Small Sector)
+         * FAT32 ã§ã¯å¸¸ã« 0000h ã€‚å…¨ã‚»ã‚¯ã‚¿æ•°ãŒ WORD(2ãƒã‚¤ãƒˆ) ã§è¡¨ã•ã‚Œã‚‹å ´åˆã®ã¿
          */
         int numberOfSmallSectors;
-        /** ƒƒfƒBƒAƒfƒBƒXƒNƒŠƒvƒ^ */
+        /** ãƒ¡ãƒ‡ã‚£ã‚¢ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ */
         int mediaDescriptor;
         /** */
         int numberOfFATSector;
@@ -109,6 +109,7 @@ public class Fat32 implements Serializable {
         BPB() throws IOException {
             byte[] buffer = rawIO.readSector(0);
             InputStream is = new ByteArrayInputStream(buffer);
+            @SuppressWarnings("resource")
             LittleEndianDataInputStream leis = new LittleEndianDataInputStream(is);
             byte[] b1 = new byte[3];
             leis.readFully(b1);
@@ -185,7 +186,7 @@ public class Fat32 implements Serializable {
         }
         /** */
         public Integer[] getClusterChain(int cluster) throws IOException {
-            List<Integer> clusters = new ArrayList<Integer>();
+            List<Integer> clusters = new ArrayList<>();
             do {
                 clusters.add(cluster);
                 cluster = this.clusters[cluster];
@@ -246,6 +247,7 @@ public class Fat32 implements Serializable {
             int position = (cluster * 4) % bpb.bytesPerSector;
             LittleEndianDataInputStream leis = new LittleEndianDataInputStream(new ByteArrayInputStream(buffer, position, 4));
             int nextCluster = leis.readInt();
+            leis.close();
 //System.err.println("sector: " + currentSector + ", posision: " + position + ", " + StringUtil.getDump(buffer, position, 4));
             return nextCluster;
         }
@@ -254,7 +256,7 @@ public class Fat32 implements Serializable {
          * @param cluster startCluster
          */
         public Integer[] getClusterChain(int cluster) throws IOException {
-            List<Integer> clusters = new ArrayList<Integer>();
+            List<Integer> clusters = new ArrayList<>();
             do {
 //System.err.println("cluster: " + StringUtil.toHex8(cluster));
                 clusters.add(cluster);
@@ -264,10 +266,10 @@ public class Fat32 implements Serializable {
         }
 
         /**
-         * <li>00000000h –¢g—pƒNƒ‰ƒXƒ^ 
-         * <li>00000002h ` 0ffffff6h ƒtƒ@ƒCƒ‹‚ÌŸ‚ÌƒNƒ‰ƒXƒ^ 
-         * <li>0ffffff7h •s—ÇƒNƒ‰ƒXƒ^ 
-         * <li>0ffffff8h ` 0fffffffh ƒtƒ@ƒCƒ‹‚ÌÅIƒNƒ‰ƒXƒ^(’Êí‚Í 0fffffffh ‚ªg—p‚³‚ê‚é) 
+         * <li>00000000h æœªä½¿ç”¨ã‚¯ãƒ©ã‚¹ã‚¿ 
+         * <li>00000002h ã€œ 0ffffff6h ãƒ•ã‚¡ã‚¤ãƒ«ã®æ¬¡ã®ã‚¯ãƒ©ã‚¹ã‚¿ 
+         * <li>0ffffff7h ä¸è‰¯ã‚¯ãƒ©ã‚¹ã‚¿ 
+         * <li>0ffffff8h ã€œ 0fffffffh ãƒ•ã‚¡ã‚¤ãƒ«ã®æœ€çµ‚ã‚¯ãƒ©ã‚¹ã‚¿(é€šå¸¸ã¯ 0fffffffh ãŒä½¿ç”¨ã•ã‚Œã‚‹) 
          * @param cluster cluster
          */
         public boolean isUsing(int cluster) throws IOException {
@@ -321,6 +323,7 @@ public class Fat32 implements Serializable {
         int shortNameCheckSum;
         /** */
         LongNameDirectoryEntry(InputStream is) throws IOException {
+            @SuppressWarnings("resource")
             LittleEndianDataInputStream leis = new LittleEndianDataInputStream(is);
             int sequenceByte = leis.readUnsignedByte();
             subEntryNo = sequenceByte & 0x3f;
@@ -362,7 +365,7 @@ public class Fat32 implements Serializable {
 
     /**
      * 
-     * {@link DosDirectoryEntry#lastAccessed()} ‚Ííœ‚µ‚½“ú•t
+     * {@link DosDirectoryEntry#lastAccessed()} ã¯å‰Šé™¤ã—ãŸæ—¥ä»˜
      */
     public class DeletedDirectoryEntry extends DosDirectoryEntry {
         /** */
@@ -378,7 +381,7 @@ public class Fat32 implements Serializable {
             super(is);
         }
         /**
-         * startClusterHigh ‚ğŒ©‚Â‚¯‚é
+         * startClusterHigh ã‚’è¦‹ã¤ã‘ã‚‹
          * @return false if not found
          */
         public boolean resolveStartCluster(MatchingStrategy<byte[], ?> matching) throws IOException {
@@ -390,10 +393,10 @@ public class Fat32 implements Serializable {
                 int startCluster = i * 0x10000 + this.startCluster;
                 int targetSector = getSector(startCluster);
                 readSector(buffer, targetSector);
-                Matcher<MatchingStrategy<byte[], ?>> matcher = new StrategyPatternMatcher<byte[], MatchingStrategy<byte[], ?>>(buffer);
+                Matcher<MatchingStrategy<byte[], ?>> matcher = new StrategyPatternMatcher<>(buffer);
                 if (matcher.indexOf(matching, 0) != -1) {
 
-                    // g‚í‚ê‚Ä‚¢‚½‚çŸ
+                    // ä½¿ã‚ã‚Œã¦ã„ãŸã‚‰æ¬¡
 
                     if (!isUsing(startCluster)) {
                         startClusterHigh = i;
@@ -432,11 +435,11 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
         int attribute;
         /** */
         int capitalFlag;
-        /** 10ms ’PˆÊ */
+        /** 10ms å˜ä½ */
         Date created;
-        /** “ú•t’PˆÊ */
+        /** æ—¥ä»˜å˜ä½ */
         Date lastAccessed;
-        /** 2sec ’PˆÊ */
+        /** 2sec å˜ä½ */
         Date lastModified;
         /** */
         int startCluster;
@@ -448,6 +451,7 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
         }
         /** */
         DosDirectoryEntry(InputStream is) throws IOException {
+            @SuppressWarnings("resource")
             LittleEndianDataInputStream leis = new LittleEndianDataInputStream(is);
             byte[] b1 = new byte[11];
             leis.readFully(b1);
@@ -546,11 +550,11 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
         }
         /** */
         Map<String, FileEntry> getEntries(int startCluster) throws IOException {
-            SortedMap<String, FileEntry> entries = new TreeMap<String, FileEntry>();
+            SortedMap<String, FileEntry> entries = new TreeMap<>();
             Integer[] clusters = fat.getClusterChain(startCluster);
 //System.err.println("clusters: " + StringUtil.paramString(clusters));
-            List<LongNameDirectoryEntry> deletedLongNames = new ArrayList<LongNameDirectoryEntry>();
-            SortedSet<LongNameDirectoryEntry> tempraryLongNames = new TreeSet<LongNameDirectoryEntry>();
+            List<LongNameDirectoryEntry> deletedLongNames = new ArrayList<>();
+            SortedSet<LongNameDirectoryEntry> tempraryLongNames = new TreeSet<>();
             for (int cluster = 0; cluster < clusters.length; cluster++) {
                 for (int sector = 0; sector < bpb.sectorsPerCluster; sector++) {
 //System.err.println("sector: " + (getSector(clusters[cluster]) + sector));
@@ -725,7 +729,7 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
         public ByteArrayMatcher(byte[] buffer) {
             this.source = buffer;
         }
-        /** Boyer-Moore –@ */
+        /** Boyer-Moore æ³• */
         public int indexOf(byte[] pattern, int fromIndex) {
             int[] skipTable = new int[256];
             if (fromIndex >= source.length) {

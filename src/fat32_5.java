@@ -45,6 +45,7 @@ System.err.print(".");
 System.err.flush();
             }
         }
+        reader.close();
 System.err.println();
         if (!found) {
 System.err.println("not found: " + word);

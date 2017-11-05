@@ -44,24 +44,24 @@ public class RawIO {
 
     //---- native access ----
 
-    /** ƒhƒ‰ƒCƒu‚Ìƒnƒ“ƒhƒ‹ */
+    /** ãƒ‰ãƒ©ã‚¤ãƒ–ã®ãƒãƒ³ãƒ‰ãƒ« */
     private int handle;
 
-    /** 1 ƒZƒNƒ^‚ÌƒoƒCƒg” */
+    /** 1 ã‚»ã‚¯ã‚¿ã®ãƒã‚¤ãƒˆæ•° */
     private int bytesPerSector;
 
     /**
-     * @–ŒãğŒ {@link #handle} ‚Æ {@link #bytesPerSector} ‚ªİ’è‚³‚ê‚Ü‚·
+     * @äº‹å¾Œæ¡ä»¶ {@link #handle} ã¨ {@link #bytesPerSector} ãŒè¨­å®šã•ã‚Œã¾ã™
      */
     private native void open(String deviceName) throws IOException;
 
     /**
-     * @–‘OğŒ {@link #open(int)} ‚ğæ‚ÉŒÄ‚ñ‚Å‚¢‚é–
+     * @äº‹å‰æ¡ä»¶ {@link #open(int)} ã‚’å…ˆã«å‘¼ã‚“ã§ã„ã‚‹äº‹
      */
     private native void read(int sectorNo, byte[] buffer) throws IOException;
 
     /**
-     * @–‘OğŒ {@link #open(int)} ‚ğæ‚ÉŒÄ‚ñ‚Å‚¢‚é–
+     * @äº‹å‰æ¡ä»¶ {@link #open(int)} ã‚’å…ˆã«å‘¼ã‚“ã§ã„ã‚‹äº‹
      */
     private native void close() throws IOException;
 

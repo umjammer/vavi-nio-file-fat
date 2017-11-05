@@ -67,9 +67,11 @@ public class fat32_1 {
                 }
             } else {
 System.err.println("file not found: " + file);
+                reader.close();
                 throw new FileNotFoundException();
             }
         }
+        reader.close();
     }
 
     /** */
@@ -85,7 +87,7 @@ System.err.println("file not found: " + file);
             int startCluster = scanner.nextInt();
             int size = scanner.nextInt();
 System.err.println("startCluster: " + startCluster + ", size: " + size);
-            List<Integer> clusters = new ArrayList<Integer>(); 
+            List<Integer> clusters = new ArrayList<>(); 
             for (int i = 0; i < fat32.getRequiredClusters(size); i++) {
                 clusters.add(startCluster + i);
             }
@@ -101,7 +103,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size);
             int lastCluster = scanner.nextInt();
             int size2nd = scanner.nextInt();
 System.err.println("startCluster: " + startCluster + ", size: " + size + ", lastCluster: "+ lastCluster + ", size2nd: " + size2nd);
-            List<Integer> clusters = new ArrayList<Integer>(); 
+            List<Integer> clusters = new ArrayList<>(); 
             int size1st = size - size2nd;
             int l = fat32.getRequiredClusters(size1st);
             for (int i = 0; i < l; i++) {
@@ -135,7 +137,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
         byte[] buffer = new byte[fat32.getBytesPerCluster()]; 
 
         //
-        // startClusterHigh ‚ðŒ©‚Â‚¯‚é
+        // startClusterHigh ã‚’è¦‹ã¤ã‘ã‚‹
         //
         if (!entry.resolveStartCluster(id3v2MatchingStrategy) || !entry.isStartClusterValid()) {
 System.err.println("start cluster not found: " + file);
@@ -144,20 +146,20 @@ System.err.println("start cluster not found: " + file);
         int startCluster = entry.getStartCluster();
 
         //
-        // ˜A‘±‚µ‚Ä‚¢‚éƒNƒ‰ƒXƒ^[‚ð‘‚«o‚·
-        // “rØ‚ê‚½‚çŽŸ‚ÌŽg‚í‚ê‚Ä‚¢‚È‚¢‚Æ‚±‚ë
+        // é€£ç¶šã—ã¦ã„ã‚‹ã‚¯ãƒ©ã‚¹ã‚¿ãƒ¼ã‚’æ›¸ãå‡ºã™
+        // é€”åˆ‡ã‚ŒãŸã‚‰æ¬¡ã®ä½¿ã‚ã‚Œã¦ã„ãªã„ã¨ã“ã‚
         //
 
 System.err.println(entry.getName() + ": " + entry.getStartCluster() + ", " + entry.length());
 
         int block = 0;
         boolean continued = false;
-outer:
+//outer:
         for (int cluster = 0; cluster < fat32.getLastCluster(); cluster++) {
             int targetCluster = startCluster + cluster;
 System.err.print("cluster: " + targetCluster);
 
-            // “rØ‚ê‚½‚çŽŸ‚ÌŽg‚í‚ê‚Ä‚¢‚È‚¢‚Æ‚±‚ë
+            // é€”åˆ‡ã‚ŒãŸã‚‰æ¬¡ã®ä½¿ã‚ã‚Œã¦ã„ãªã„ã¨ã“ã‚
 
             if (fat32.isUsing(targetCluster)) {
 System.err.println(" has used, skip");
@@ -190,7 +192,7 @@ System.err.println();
         byte[] buffer = new byte[fat32.getBytesPerSector()];
 
         //
-        // startClusterHigh ‚ðŒ©‚Â‚¯‚é
+        // startClusterHigh ã‚’è¦‹ã¤ã‘ã‚‹
         //
         if (!entry.resolveStartCluster(id3v2MatchingStrategy) || !entry.isStartClusterValid()) {
 System.err.println("start cluster not found: " + file);
@@ -199,8 +201,8 @@ System.err.println("start cluster not found: " + file);
         int startCluster = entry.getStartCluster();
 
         //
-        // ˜A‘±‚µ‚Ä‚¢‚éƒNƒ‰ƒXƒ^[‚ð‘‚«o‚·
-        // “rØ‚ê‚½‚çŽŸ‚ÌŽg‚í‚ê‚Ä‚¢‚È‚¢‚Æ‚±‚ë
+        // é€£ç¶šã—ã¦ã„ã‚‹ã‚¯ãƒ©ã‚¹ã‚¿ãƒ¼ã‚’æ›¸ãå‡ºã™
+        // é€”åˆ‡ã‚ŒãŸã‚‰æ¬¡ã®ä½¿ã‚ã‚Œã¦ã„ãªã„ã¨ã“ã‚
         //
         
         File output = new File(outdir, file);
@@ -217,7 +219,7 @@ outer:
 System.err.print("cluster: " + targetCluster);
 
 
-            // “rØ‚ê‚½‚çŽŸ‚ÌŽg‚í‚ê‚Ä‚¢‚È‚¢‚Æ‚±‚ë
+            // é€”åˆ‡ã‚ŒãŸã‚‰æ¬¡ã®ä½¿ã‚ã‚Œã¦ã„ãªã„ã¨ã“ã‚
 
             if (fat32.isUsing(targetCluster)) {
 System.err.println(" has used, skip");
@@ -226,7 +228,7 @@ System.err.println(" has used, skip");
                 continue;
             }
 
-            // 1 ƒNƒ‰ƒXƒ^‚Ì‘‚«o‚µ
+            // 1 ã‚¯ãƒ©ã‚¹ã‚¿ã®æ›¸ãå‡ºã—
 
             for (int sector = 0; sector < fat32.getSectorsPerCluster(); sector++) {
                 int targetSector = fat32.getSector(targetCluster) + sector;
@@ -264,7 +266,7 @@ System.err.println(" salvaged, finish: " + (entry.length() - rest) + "/" + entry
         boolean incomplete = false;
 
         //
-        // startClusterHigh ‚ðŒ©‚Â‚¯‚é
+        // startClusterHigh ã‚’è¦‹ã¤ã‘ã‚‹
         //
 
         if (!entry.resolveStartCluster(id3v2MatchingStrategy) || !entry.isStartClusterValid()) {
@@ -274,8 +276,8 @@ System.err.println("start cluster not found: " + file);
         int startCluster = entry.getStartCluster();
 
         //
-        // ˜A‘±‚µ‚Ä‚¢‚éƒNƒ‰ƒXƒ^[‚ð‘‚«o‚·
-        // “rØ‚ê‚½‚çI‚í‚è
+        // é€£ç¶šã—ã¦ã„ã‚‹ã‚¯ãƒ©ã‚¹ã‚¿ãƒ¼ã‚’æ›¸ãå‡ºã™
+        // é€”åˆ‡ã‚ŒãŸã‚‰çµ‚ã‚ã‚Š
         //
         
         File output = new File(outdir, file);
@@ -292,7 +294,7 @@ outer:
 System.err.print("cluster: " + targetCluster);
 
 
-            // “rØ‚ê‚½‚çI‚í‚è
+            // é€”åˆ‡ã‚ŒãŸã‚‰çµ‚ã‚ã‚Š
 
             if (fat32.isUsing(targetCluster)) {
 System.err.println(" has used, skip");
@@ -304,7 +306,7 @@ System.err.println("salvage, not continued: " + file + ": " + (entry.length() - 
             }
 
 
-            // 1 ƒNƒ‰ƒXƒ^‚Ì‘‚«o‚µ
+            // 1 ã‚¯ãƒ©ã‚¹ã‚¿ã®æ›¸ãå‡ºã—
 
             for (int sector = 0; sector < fat32.getSectorsPerCluster(); sector++) {
                 int targetSector = fat32.getSector(targetCluster) + sector;
@@ -328,7 +330,7 @@ System.err.println("salvage finished: " + (entry.length() - rest) + "/" + entry.
         os.close();
         output.setLastModified(entry.lastModified());
 
-        // “rØ‚ê‚½‚ç incomplete ‚ð•t‚¯‚é
+        // é€”åˆ‡ã‚ŒãŸã‚‰ incomplete ã‚’ä»˜ã‘ã‚‹
         
         if (incomplete) {
             output.renameTo(new File(outdir, file + "." + "incomplete"));
