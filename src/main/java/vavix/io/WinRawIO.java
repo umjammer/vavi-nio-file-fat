@@ -8,8 +8,6 @@ package vavix.io;
 
 import java.io.IOException;
 
-import vavi.util.StringUtil;
-
 
 /**
  * RawIO. 
@@ -17,24 +15,26 @@ import vavi.util.StringUtil;
  * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version 0.00 060108 nsano initial version <br>
  */
-public class RawIO {
+public class WinRawIO implements IOSource {
 
     /** */
-    public RawIO(String deviceName) throws IOException {
-        open(deviceName);
+    public WinRawIO(String deviceName) throws IOException {
+        deviceName = deviceName.toUpperCase();
+        if (!deviceName.matches("[A-Z]\\:")) {
+            throw new IllegalArgumentException(deviceName);
+        }
+        open("\\\\.\\" + deviceName);
     }
 
-    /** TODO deprecate? */
-    public byte[] readSector(int sectorNo) throws IOException {
-        byte[] buffer = new byte[bytesPerSector];
-        read(sectorNo, buffer);
-        return buffer;
-    }
-
-    /** */
-    public int readSector(byte[] buffer, int sectorNo) throws IOException {
+    @Override
+	public int readSector(byte[] buffer, int sectorNo) throws IOException {
         read(sectorNo, buffer);
         return bytesPerSector;
+    }
+
+    @Override
+    public int getBytesPerSector() {
+    	return bytesPerSector;
     }
 
     /** */
@@ -68,34 +68,6 @@ public class RawIO {
     /** */
     static {
         System.loadLibrary("RawIO");
-    }
-
-    //----
-
-    /** */
-    public static void main(String[] args) throws Exception {
-        exec2(args);
-    }
-
-    /** */
-    public static void exec2(String[] args) throws Exception {
-        RawIO win32IO = new RawIO("\\\\.\\" + args[0]);
-        byte[] buffer = win32IO.readSector(0);
-        System.err.println(StringUtil.getDump(buffer));
-    }
-
-    /** */
-    public static void exec1(String[] args) throws Exception {
-        for (int i = 0; i < 16; i++) {
-            try {
-                RawIO win32IO = new RawIO("\\\\.\\PhysicalDrive" + i);
-                byte[] buffer = win32IO.readSector(0);
-                System.err.println(StringUtil.getDump(buffer));
-            } catch (IOException e) {
-                System.err.println(e);
-                System.err.println("no drive: " + i);
-            }
-        }
     }
 }
 

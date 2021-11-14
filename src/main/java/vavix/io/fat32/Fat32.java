@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -20,11 +21,16 @@ import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Level;
 
 import vavi.io.LittleEndianDataInputStream;
+import vavi.util.Debug;
 import vavi.util.StringUtil;
+import vavi.util.injection.Element;
+import vavi.util.injection.Injector;
 import vavi.util.win32.DateUtil;
-import vavix.io.RawIO;
+
+import vavix.io.IOSource;
 
 
 /**
@@ -39,7 +45,7 @@ public class Fat32 implements Serializable {
     private static final long serialVersionUID = -3299419883884944569L;
 
     /** */
-    protected transient RawIO rawIO;
+    protected transient IOSource io;
 
     /** */
     protected BPB bpb;
@@ -47,107 +53,125 @@ public class Fat32 implements Serializable {
     /** */
     protected Fat fat;
 
-    /** */
+    @Injector(bigEndian = false)
     public class BPB implements Serializable {
         /** */
         private static final long serialVersionUID = -1066456664696979810L;
+        @Element(sequence = 1)
+        byte[] jump = new byte[3];
         /** OEM ラベル名 */
+        @Element(sequence = 2, value = "8")
         String oemLavel;
         /** 論理セクタサイズ */
+        @Element(sequence = 3, value = "unsigned short")
         public int bytesPerSector;
         /** 1クラスタ(アロケーションユニット)あたりのセクタ数 */
+        @Element(sequence = 4, value = "unsigned byte")
         public int sectorsPerCluster;
         /** 予約セクタ数 */
+        @Element(sequence = 5, value = "unsigned short")
         int reservedSectors;
         /** FAT の数 */
+        @Element(sequence = 6, value = "unsigned byte")
         int numberOfFAT;
         /**
          * ルートディレクトリエントリの最大数
          * FAT12/16 用であり，FAT32 では常に 0000h
          */
+        @Element(sequence = 7, value = "unsigned short")
         int maxRootDirectoryEntries;
         /**
          * 全セクタ数(Small Sector)
          * FAT32 では常に 0000h 。全セクタ数が WORD(2バイト) で表される場合のみ
          */
+        @Element(sequence = 8, value = "unsigned short")
         int numberOfSmallSectors;
         /** メディアディスクリプタ */
+        @Element(sequence = 9, value = "unsigned byte")
         int mediaDescriptor;
         /** */
+        @Element(sequence = 10, value = "unsigned short")
         int numberOfFATSector;
         /** */
+        @Element(sequence = 11, value = "unsigned short")
         int sectorsPerTrack;
         /** */
+        @Element(sequence = 12, value = "unsigned short")
         int headsPerDrive;
         /** */
+        @Element(sequence = 13)
         int invisibleSectors;
         /** */
+        @Element(sequence = 14)
         public long numberOfLargeSectors;
         /** */
+        @Element(sequence = 15, value = "3")
         int sectorsPerFAT;
         /** */
+        @Element(sequence = 16, value = "unsigned short")
         int mediaDescriptionFlag;
         /** */
+        @Element(sequence = 17, value = "unsigned short")
         int fileSystemVersion;
         /** */
+        @Element(sequence = 18)
         int startClusterOfRootDirectory;
         /** */
+        @Element(sequence = 19, value = "unsigned short")
         int sectorOfFSInfo;
         /** */
+        @Element(sequence = 20, value = "unsigned short")
         int sectorOfCopyBootSector;
+        @Element(sequence = 21)
+        byte[] b3 = new byte[12];
         /** */
+        @Element(sequence = 22, value = "unsigned byte")
         int physicalDriveNumber;
+        @Element(sequence = 23)
+        byte b4;
         /** */
+        @Element(sequence = 24, value = "unsigned byte")
         int bootSignature;
         /** */
+        @Element(sequence = 25)
         int volumeSerialID;
         /** */
+        @Element(sequence = 26, value = "11")
         String volumeLavel;
         /** */
+        @Element(sequence = 27, value = "8")
         String fileSystemType;
-        /** */
-        BPB() throws IOException {
-            byte[] buffer = rawIO.readSector(0);
-            InputStream is = new ByteArrayInputStream(buffer);
-            @SuppressWarnings("resource")
-            LittleEndianDataInputStream leis = new LittleEndianDataInputStream(is);
-            byte[] b1 = new byte[3];
-            leis.readFully(b1);
-            byte[] b2 = new byte[8];
-            leis.readFully(b2);
-            oemLavel = new String(b2);
-            bytesPerSector = leis.readShort();
-            sectorsPerCluster = leis.readUnsignedByte();
-            reservedSectors = leis.readShort();
-            numberOfFAT = leis.readUnsignedByte();
-            maxRootDirectoryEntries = leis.readShort();
-            numberOfSmallSectors = leis.readShort();
-            mediaDescriptor = leis.readUnsignedByte();
-            numberOfFATSector = leis.readShort();
-            sectorsPerTrack = leis.readShort();
-            headsPerDrive = leis.readShort();
-            invisibleSectors = leis.readInt();
-            numberOfLargeSectors = leis.readInt();
-            sectorsPerFAT = leis.readInt();
-            mediaDescriptionFlag = leis.readShort();
-            fileSystemVersion = leis.readShort();
-            startClusterOfRootDirectory = leis.readInt();
-            sectorOfFSInfo = leis.readShort();
-            sectorOfCopyBootSector = leis.readShort();
-            byte[] b3 = new byte[12];
-            leis.readFully(b3);
-            physicalDriveNumber = leis.readUnsignedByte();
-            byte[] b4 = new byte[1];
-            leis.readFully(b4);
-            bootSignature = leis.readUnsignedByte();
-            volumeSerialID = leis.readInt();
-            byte[] b5 = new byte[11];
-            leis.readFully(b5);
-            volumeLavel = new String(b5);
-            byte[] b6 = new byte[8];
-            leis.readFully(b6);
-            fileSystemType = new String(b6);
-//System.err.println(StringUtil.paramString(this).replace(',', '\n'));
+        @Override
+        public String toString() {
+            return String
+                    .format("BPB [jump=%s, oemLavel=%s, bytesPerSector=%s, sectorsPerCluster=%s, reservedSectors=%s, numberOfFAT=%s, maxRootDirectoryEntries=%s, numberOfSmallSectors=%s, mediaDescriptor=%s, numberOfFATSector=%s, sectorsPerTrack=%s, headsPerDrive=%s, invisibleSectors=%s, numberOfLargeSectors=%s, sectorsPerFAT=%s, mediaDescriptionFlag=%s, fileSystemVersion=%s, startClusterOfRootDirectory=%s, sectorOfFSInfo=%s, sectorOfCopyBootSector=%s, b3=%s, physicalDriveNumber=%s, b4=%s, bootSignature=%s, volumeSerialID=%s, volumeLavel=%s, fileSystemType=%s]",
+                            Arrays.toString(jump),
+                            oemLavel,
+                            bytesPerSector,
+                            sectorsPerCluster,
+                            reservedSectors,
+                            numberOfFAT,
+                            maxRootDirectoryEntries,
+                            numberOfSmallSectors,
+                            mediaDescriptor,
+                            numberOfFATSector,
+                            sectorsPerTrack,
+                            headsPerDrive,
+                            invisibleSectors,
+                            numberOfLargeSectors,
+                            sectorsPerFAT,
+                            mediaDescriptionFlag,
+                            fileSystemVersion,
+                            startClusterOfRootDirectory,
+                            sectorOfFSInfo,
+                            sectorOfCopyBootSector,
+                            Arrays.toString(b3),
+                            physicalDriveNumber,
+                            b4,
+                            bootSignature,
+                            volumeSerialID,
+                            volumeLavel,
+                            fileSystemType);
         }
         public final int getBytesPerCluster() {
             return bytesPerSector * sectorsPerCluster;
@@ -234,21 +258,20 @@ public class Fat32 implements Serializable {
         }
 
         /** TODO thread unsafe */
-        private byte[] buffer;
-        /** TODO thread unsafe */
         private int currentSector;
         /** TODO thread unsafe */
         int nextCluster(int cluster) throws IOException {
+            byte[] buffer = new byte[1024];
             int sector = getStartSector() + cluster * 4 / bpb.bytesPerSector;
             if (sector != currentSector) {
-                buffer = rawIO.readSector(sector);
+                io.readSector(buffer, sector);
                 currentSector = sector;
             }
             int position = (cluster * 4) % bpb.bytesPerSector;
             LittleEndianDataInputStream leis = new LittleEndianDataInputStream(new ByteArrayInputStream(buffer, position, 4));
             int nextCluster = leis.readInt();
             leis.close();
-//System.err.println("sector: " + currentSector + ", posision: " + position + ", " + StringUtil.getDump(buffer, position, 4));
+Debug.println(Level.FINE, "sector: " + currentSector + ", posision: " + position + ", " + StringUtil.getDump(buffer, position, 4));
             return nextCluster;
         }
 
@@ -258,7 +281,7 @@ public class Fat32 implements Serializable {
         public Integer[] getClusterChain(int cluster) throws IOException {
             List<Integer> clusters = new ArrayList<>();
             do {
-//System.err.println("cluster: " + StringUtil.toHex8(cluster));
+Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
             } while (00000002 <= cluster && cluster <= 0x0ffffff6);
@@ -274,7 +297,7 @@ public class Fat32 implements Serializable {
          */
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
-//System.err.println("cluster: " + StringUtil.toHex8(cluster));
+Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
             return 00000002 <= cluster && cluster <= 0x0fffffff;
         }
         /** */
@@ -323,7 +346,6 @@ public class Fat32 implements Serializable {
         int shortNameCheckSum;
         /** */
         LongNameDirectoryEntry(InputStream is) throws IOException {
-            @SuppressWarnings("resource")
             LittleEndianDataInputStream leis = new LittleEndianDataInputStream(is);
             int sequenceByte = leis.readUnsignedByte();
             subEntryNo = sequenceByte & 0x3f;
@@ -346,7 +368,7 @@ public class Fat32 implements Serializable {
             if (p != -1) {
                 filename = filename.substring(0, p);
             }
-//System.err.println("subEntryNo: " + subEntryNo + ", " + isLast + ", " + filename);
+Debug.println(Level.FINE, "subEntryNo: " + subEntryNo + ", " + isLast + ", " + filename);
         }
         public int compareTo(LongNameDirectoryEntry entry) {
             return this.subEntryNo - entry.subEntryNo;
@@ -451,7 +473,6 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
         }
         /** */
         DosDirectoryEntry(InputStream is) throws IOException {
-            @SuppressWarnings("resource")
             LittleEndianDataInputStream leis = new LittleEndianDataInputStream(is);
             byte[] b1 = new byte[11];
             leis.readFully(b1);
@@ -484,11 +505,11 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
         public final void setLongName(Collection<LongNameDirectoryEntry> longNames) {
             StringBuilder sb = new StringBuilder();
             for (LongNameDirectoryEntry entry : longNames) {
-//System.err.println("subEntryNo: " + entry.subEntryNo + ", " + entry.isLast + ", " + entry.filename);
+Debug.println(Level.FINE, "subEntryNo: " + entry.subEntryNo + ", " + entry.isLast + ", " + entry.filename);
                 sb.append(entry.filename);
             }
             longName = sb.toString();
-//System.err.println("longName: " + longName + ", " + longNames.size() + ", " + filename);
+Debug.println(Level.FINE, "longName: " + longName + ", " + longNames.size() + ", " + filename);
         }
         /** */
         public String getName() {
@@ -532,7 +553,7 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
          * @param path F:\xxx\yyy
          */
         Directory(String path) throws IOException {
-//System.err.println("**** directory: \\");
+Debug.println(Level.FINE, "**** directory: \\");
             if (path.indexOf(':') == 1) {
                 path = path.substring(2);
             }
@@ -540,7 +561,7 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
             StringTokenizer st = new StringTokenizer(path, "\\");
             while (st.hasMoreTokens()) {
                 String directory = st.nextToken();
-//System.err.println("**** directory: " + directory);
+Debug.println(Level.FINE, "**** directory: " + directory);
                 if (entries.containsKey(directory)) {
                     entries = getEntries(entries.get(directory).getStartCluster());
                 } else {
@@ -552,20 +573,21 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
         Map<String, FileEntry> getEntries(int startCluster) throws IOException {
             SortedMap<String, FileEntry> entries = new TreeMap<>();
             Integer[] clusters = fat.getClusterChain(startCluster);
-//System.err.println("clusters: " + StringUtil.paramString(clusters));
+Debug.println(Level.FINE, "clusters: " + StringUtil.paramString(clusters));
             List<LongNameDirectoryEntry> deletedLongNames = new ArrayList<>();
             SortedSet<LongNameDirectoryEntry> tempraryLongNames = new TreeSet<>();
             for (int cluster = 0; cluster < clusters.length; cluster++) {
                 for (int sector = 0; sector < bpb.sectorsPerCluster; sector++) {
-//System.err.println("sector: " + (getSector(clusters[cluster]) + sector));
-                    byte[] buffer = rawIO.readSector(getSector(clusters[cluster]) + sector);
+Debug.println(Level.FINE, "sector: " + (getSector(clusters[cluster]) + sector));
+                    byte[] buffer = new byte[1024]; 
+            		io.readSector(buffer, getSector(clusters[cluster]) + sector);
                     for (int entry = 0; entry < 16; entry++) {
                         InputStream is = new ByteArrayInputStream(buffer, entry * 32, 32);
                         int firstByte = buffer[entry * 32] & 0xff;
                         int attributeByte = buffer[entry * 32 + 0x0b];
                         switch (firstByte) {
                         case 0x00:
-//System.err.println("none");
+Debug.println(Level.FINE, "none");
                             break;
                         case 0xe5: {
                             if (attributeByte == 0x0f) {
@@ -573,7 +595,7 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
                                 deletedLongNames.add(0, directoryEntry);
                             } else {
                                 FileEntry directoryEntry = new DeletedDirectoryEntry(is);
-//System.err.println(StringUtil.paramString(directoryEntry));
+Debug.println(Level.FINE, StringUtil.paramString(directoryEntry));
                                 if (deletedLongNames.size() != 0) {
                                     directoryEntry.setLongName(deletedLongNames);
                                     deletedLongNames.clear();
@@ -589,11 +611,11 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
                         default: {
                             if (attributeByte == 0x0f) {
                                 LongNameDirectoryEntry directoryEntry = new LongNameDirectoryEntry(is);
-//System.err.println(StringUtil.paramString(directoryEntry));
+Debug.println(Level.FINE, StringUtil.paramString(directoryEntry));
                                 tempraryLongNames.add(directoryEntry);
                             } else {
                                 FileEntry directoryEntry = new DosDirectoryEntry(is);
-//System.err.println(StringUtil.paramString(directoryEntry));
+Debug.println(Level.FINE, StringUtil.paramString(directoryEntry));
                                 if (tempraryLongNames.size() != 0) {
                                     directoryEntry.setLongName(tempraryLongNames);
                                     tempraryLongNames.clear();
@@ -606,9 +628,9 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
                     }
                 }
             }
-//for (String name : entries.keySet()) {
-// System.err.println(name + ": " + entries.get(name).getStartCluster() + ", " + StringUtil.toHex8(entries.get(name).getStartCluster()));
-//}
+for (String name : entries.keySet()) {
+ Debug.printf(Level.FINE, "%s: %d, %08x\n", name, entries.get(name).getStartCluster(), entries.get(name).getStartCluster());
+}
             return entries;
         }
     }
@@ -669,7 +691,7 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
         byte[] buf = new byte[bpb.bytesPerSector];
         for (int sector = 0; sector < bpb.sectorsPerCluster; sector++) {
             int targetSector = getSector(cluster) + sector;
-            rawIO.readSector(buf, targetSector);
+            io.readSector(buf, targetSector);
             System.arraycopy(buf, 0, buffer, bpb.bytesPerSector * sector, bpb.bytesPerSector);
         }
         return bpb.getBytesPerCluster();
@@ -677,7 +699,7 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
 
     /** */
     public int readSector(byte[] buffer, int sector) throws IOException {
-        return rawIO.readSector(buffer, sector);
+        return io.readSector(buffer, sector);
     }
 
     /** */
@@ -687,13 +709,13 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
     }
 
     /** */
-    public Fat32(String deviceName) throws IOException {
-        deviceName = deviceName.toUpperCase();
-        if (!deviceName.matches("[A-Z]\\:")) {
-            throw new IllegalArgumentException(deviceName);
-        }
-        rawIO = new RawIO("\\\\.\\" + deviceName);
+    public Fat32(IOSource io) throws IOException {
+        this.io = io;
+        int bps = io.getBytesPerSector();
+        byte[] bytes = new byte[bps];
+        io.readSector(bytes, 0);
         bpb = new BPB();
+        Injector.Util.inject(new ByteArrayInputStream(bytes), bpb);
         fat = new Fat32Fat();
     }
 
@@ -729,7 +751,7 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
         public ByteArrayMatcher(byte[] buffer) {
             this.source = buffer;
         }
-        /** Boyer-Moore 法 */
+        /** Boyer-Moore Algorithm */
         public int indexOf(byte[] pattern, int fromIndex) {
             int[] skipTable = new int[256];
             if (fromIndex >= source.length) {
@@ -756,22 +778,6 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
             }
             return -1;
         }
-    }
-
-    //----
-
-    /**
-     * @param args 0:dir F:\xxx\yyy
-     */
-    public static void main(String[] args) throws Exception {
-        String path = args[0];
-        String deviceName = path.substring(0, 2);
-//System.err.println(deviceName + ", " + path);
-        Fat32 fat32 = new Fat32(deviceName);
-        Map<String, FileEntry> entries = fat32.getEntries(path);
-for (FileEntry entry : entries.values()) {
- System.err.println(entry.getName() + ": " + entry.getStartCluster());
-}
     }
 }
 

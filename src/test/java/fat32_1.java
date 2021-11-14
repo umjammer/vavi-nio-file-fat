@@ -18,6 +18,7 @@ import java.util.Scanner;
 
 import vavi.util.StringUtil;
 
+import vavix.io.WinRawIO;
 import vavix.io.fat32.Fat32;
 import vavix.io.fat32.Fat32.DeletedDirectoryEntry;
 import vavix.io.fat32.Fat32.Fat;
@@ -44,10 +45,9 @@ public class fat32_1 {
 
     /** */
     private fat32_1(String[] args) throws Exception {
-        String deviceName = args[0].substring(0, 2);
         String outdir = args[1];
 //System.err.println(deviceName + ", " + path + ", " + file);
-        this.fat32 = new Fat32(deviceName);
+        this.fat32 = new Fat32(new WinRawIO(args[0]));
         Map<String, FileEntry> entries = fat32.getEntries(args[0]);
 //for (DirectoryEntry entry : entries.values()) {
 // System.err.println(entry.getName() + ": " + entry.getStartCluster());

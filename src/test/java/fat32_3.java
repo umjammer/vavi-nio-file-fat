@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Scanner;
 
 import vavi.util.StringUtil;
+
+import vavix.io.WinRawIO;
 import vavix.io.fat32.Fat32;
 import vavix.io.fat32.Fat32.FileEntry;
 
@@ -34,8 +36,8 @@ public class fat32_3 {
      * @param args 0:deviceName, 1:last clusters file 2:size
      */
     static void exec3(String[] args) throws Exception {
-        String deviceName = args[0].substring(0, 2);
-        Fat32 fat32 = new Fat32(deviceName);
+        String deviceName = args[0];
+        Fat32 fat32 = new Fat32(new WinRawIO(deviceName));
         String file = args[1];
         int size = Integer.parseInt(args[2]);
 
@@ -79,8 +81,8 @@ System.err.println("found at cluster: " + lastCluster + "\n" + StringUtil.getDum
      * @param args 0:indir, 1:filelist
      */
     static void exec2(String[] args) throws Exception {
-        String deviceName = args[0].substring(0, 2);
-        Fat32 fat32 = new Fat32(deviceName);
+        String deviceName = args[0];
+        Fat32 fat32 = new Fat32(new WinRawIO(deviceName));
         Map<String, FileEntry> entries = fat32.getEntries(args[0]);
 
         byte[] buffer = new byte[fat32.getBytesPerSector()]; 
@@ -119,9 +121,9 @@ System.err.println(", startClusterHigh: " + i + "\n" + StringUtil.getDump(buffer
      * @param args 0:indir, 1:filelist
      */
     public static void exec1(String[] args) throws Exception {
-        String deviceName = args[0].substring(0, 2);
+        String deviceName = args[0];
 //System.err.println(deviceName + ", " + path + ", " + file);
-        Fat32 fat32 = new Fat32(deviceName);
+        Fat32 fat32 = new Fat32(new WinRawIO(deviceName));
         Map<String, FileEntry> entries = fat32.getEntries(args[0]);
 //for (DirectoryEntry entry : entries.values()) {
 // System.err.println(entry.getName() + ": " + entry.getStartCluster());

@@ -5,6 +5,8 @@
  */
 
 import vavi.util.StringUtil;
+
+import vavix.io.WinRawIO;
 import vavix.io.fat32.Fat32;
 
 
@@ -29,7 +31,7 @@ public class fat32_2 {
      */
     static void exec2(String[] args) throws Exception {
         String deviceName = args[0];
-        Fat32 fat32 = new Fat32(deviceName);
+        Fat32 fat32 = new Fat32(new WinRawIO(deviceName));
 
         byte[] buffer = new byte[fat32.getBytesPerCluster()]; 
         int start = 3;
@@ -52,7 +54,7 @@ public class fat32_2 {
      */
     static void exec1(String[] args) throws Exception {
         String deviceName = args[0];
-        Fat32 fat32 = new Fat32(deviceName);
+        Fat32 fat32 = new Fat32(new WinRawIO(deviceName));
 
         byte[] buffer = new byte[fat32.getBytesPerCluster()]; 
         int start = 3;

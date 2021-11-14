@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import vavi.util.StringUtil;
+
+import vavix.io.WinRawIO;
 import vavix.io.fat32.Fat32;
 import vavix.io.fat32.Fat32.Fat;
 
@@ -88,7 +90,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
      * @param args 0:device, 1:outdir, 2:list file (tsv)
      */
     static void exec5(String[] args) throws Exception {
-        Fat32 fat32 = new Fat32(args[0]);
+        Fat32 fat32 = new Fat32(new WinRawIO(args[0]));
         String file = args[2];
 
         final int plus = 2000;
@@ -144,7 +146,7 @@ System.err.println("cluster: " + i + ": " + c + "\n" + StringUtil.getDump(buffer
      * @param args 0:device, 1:outdir, 2:list file (tsv)
      */
     void exec4(String[] args) throws Exception {
-        this.fat32 = new Fat32(args[0]);
+        this.fat32 = new Fat32(new WinRawIO(args[0]));
         String dir = args[1];
         String file = args[2];
 
@@ -218,7 +220,7 @@ System.err.println(" 2nd parts salvaged, finish: " + ((clusterList.size() - 1) *
      * @param args 0:device, 1:outdir, 2:list file (tsv)
      */
     void exec3(String[] args) throws Exception {
-        this.fat32 = new Fat32(args[0]);
+        this.fat32 = new Fat32(new WinRawIO(args[0]));
         String dir = args[1];
         String file = args[2];
 
@@ -308,7 +310,7 @@ System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valu
      * @param args 0:device, 1:outdir, 2:list file (tsv)
      */
     void exec2(String[] args) throws Exception {
-        this.fat32 = new Fat32(args[0]);
+        this.fat32 = new Fat32(new WinRawIO(args[0]));
         String dir = args[1];
         String file = args[2];
 
@@ -384,7 +386,7 @@ System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valu
      * @param args 0:device, 1:outdir, 2:list file (csv)
      */
     void exec1(String[] args) throws Exception {
-        this.fat32 = new Fat32(args[0]);
+        this.fat32 = new Fat32(new WinRawIO(args[0]));
         String dir = args[1];
         String file = args[2];
 

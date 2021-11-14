@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import vavix.io.WinRawIO;
 import vavix.io.fat32.Fat32;
 import vavix.io.fat32.Fat32.DeletedDirectoryEntry;
 import vavix.io.fat32.Fat32.DosDirectoryEntry;
@@ -101,7 +102,7 @@ public class fat32_6 {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     fat32_6(String[] args) throws Exception {
         String deviceName = args[0];
-        this.fat32 = new Fat32(deviceName);
+        this.fat32 = new Fat32(new WinRawIO(deviceName));
 
         File cache = new File("deletedEntries.cache");
         List<DeletedDirectoryEntry> deletedEntries;
