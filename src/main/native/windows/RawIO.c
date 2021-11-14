@@ -13,27 +13,27 @@
 /*
  * Raw Device Access.
  *
- * @author	<a href=mailto:vavivavi@yahoo.co.jp>nsano</a>
- * @version	0.00	060108	nsano	initial version <br>
+ * @author <a href=mailto:vavivavi@yahoo.co.jp>nsano</a>
+ * @version 0.00 060108 nsano initial version <br>
  */
 
 //-----------------------------------------------------------------------------
 
 /**
- * �A�[�J�C�u�̃n���h�����擾���܂��B
+ * アーカイブのハンドルを取得します。
  * @return NativeGcaArchive#instance
  */
 /** */
 #define getDriveHandle(env,obj) getIntField((env),(obj),"handle")
 
 /**
- * bytesPerSector ���擾���܂��B
+ * bytesPerSector を取得します。
  * @return NativeGcaArchive#instance
  */
 #define getBytesPerSector(env,obj) getIntField((env),(obj),"bytesPerSector")
 
 /**
- * int �^�̃t�B�[���h�l���擾���܂��B
+ * int 型のフィールド値を取得します。
  */
 static jint getIntField(JNIEnv *env, jobject obj, char *name) {
     jclass class = (*env)->GetObjectClass(env, obj);
@@ -42,7 +42,7 @@ static jint getIntField(JNIEnv *env, jobject obj, char *name) {
 }
 
 /**
- * ��O�𓊂��܂��B
+ * 例外を投げます。
  * @param exception "java/lang/Exception"
  */
 static void throwExceptionWithStringMessage(JNIEnv *env, char *exception, char *_message) {
@@ -62,11 +62,11 @@ JNIEXPORT void JNICALL Java_vavix_io_RawIO_open(JNIEnv *env, jobject obj, jstrin
     char *_deviceName = (*env)->GetStringUTFChars(env, deviceName, &jdummy);
     HANDLE handle = CreateFile(_deviceName,
                                GENERIC_READ,
-	                       FILE_SHARE_READ,
-	                       NULL,
+                               FILE_SHARE_READ,
+                               NULL,
                                OPEN_EXISTING,
- 		               0,
-		               NULL); 
+                               0,
+                               NULL); 
     if (handle == INVALID_HANDLE_VALUE) {
         throwExceptionWithStringMessage(env, "java/io/IOException", _deviceName);
         (*env)->ReleaseStringUTFChars(env, deviceName, _deviceName);
@@ -78,9 +78,9 @@ JNIEXPORT void JNICALL Java_vavix_io_RawIO_open(JNIEnv *env, jobject obj, jstrin
     if (!DeviceIoControl(handle,
                          IOCTL_DISK_GET_DRIVE_GEOMETRY,
                          NULL, 0, 
-	                 &diskGeometory, sizeof(diskGeometory),
-	 	         &dummy,
-	                 (LPOVERLAPPED) NULL)) {
+                         &diskGeometory, sizeof(diskGeometory),
+                         &dummy,
+                         (LPOVERLAPPED) NULL)) {
         throwExceptionWithStringMessage(env, "java/io/IOException", "IOCTL_DISK_GET_DRIVE_GEOMETRY");
         (*env)->ReleaseStringUTFChars(env, deviceName, _deviceName);
         return;
