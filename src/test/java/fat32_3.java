@@ -99,9 +99,9 @@ System.err.print("cluster: " + startCluster);
                     int targetSector = fat32.getSector(startCluster);
                     fat32.readSector(buffer, targetSector);
                     if (buffer[0] == 'I' && buffer[1] == 'D' && buffer[2] == '3') {
-        
+
                         // 使われていたら次
-        
+
                         if (!fat32.isUsing(startCluster)) {
 System.err.println("startCluster: " + startCluster + ", startClusterHigh: " + i + "\n" + StringUtil.getDump(buffer));
                         }

@@ -387,7 +387,7 @@ Debug.println(Level.FINE, "subEntryNo: " + subEntryNo + ", " + isLast + ", " + f
 
     /**
      * 
-     * {@link DosDirectoryEntry#lastAccessed()} は削除した日付
+     * {@link DosDirectoryEntry#lastAccessed()} is the date deleted.
      */
     public class DeletedDirectoryEntry extends DosDirectoryEntry {
         /** */
@@ -403,7 +403,7 @@ Debug.println(Level.FINE, "subEntryNo: " + subEntryNo + ", " + isLast + ", " + f
             super(is);
         }
         /**
-         * startClusterHigh を見つける
+         * Finds `startClusterHigh`.
          * @return false if not found
          */
         public boolean resolveStartCluster(MatchingStrategy<byte[], ?> matching) throws IOException {
@@ -418,7 +418,7 @@ Debug.println(Level.FINE, "subEntryNo: " + subEntryNo + ", " + isLast + ", " + f
                 Matcher<MatchingStrategy<byte[], ?>> matcher = new StrategyPatternMatcher<>(buffer);
                 if (matcher.indexOf(matching, 0) != -1) {
 
-                    // 使われていたら次
+                    // next if it used.
 
                     if (!isUsing(startCluster)) {
                         startClusterHigh = i;
@@ -457,11 +457,11 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
         int attribute;
         /** */
         int capitalFlag;
-        /** 10ms 単位 */
+        /** unit is 10ms */
         Date created;
-        /** 日付単位 */
+        /** unit is date */
         Date lastAccessed;
-        /** 2sec 単位 */
+        /** unit is 2sec */
         Date lastModified;
         /** */
         int startCluster;

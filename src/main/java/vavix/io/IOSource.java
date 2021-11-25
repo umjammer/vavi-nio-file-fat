@@ -11,11 +11,11 @@ import java.io.IOException;
 
 public interface IOSource {
 
-	/** */
-	int readSector(byte[] buffer, int sectorNo) throws IOException;
+    /** */
+    int readSector(byte[] buffer, int sectorNo) throws IOException;
 
-	/** */
-	int getBytesPerSector();
+    /** */
+    int getBytesPerSector();
 }
 
 /* */

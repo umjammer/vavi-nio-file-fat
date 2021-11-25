@@ -129,7 +129,7 @@ System.err.printf("%tF, %tF, %tF: %s, %d\n", entry.lastAccessed(), entry.lastMod
         // + 自分が削除された lastAccessed() より前に作られた lastCreated()
         // - 自分が削除された lastAccessed() より前に削除された
     }
- 
+
     /** */
     void dig(String path, List<DeletedDirectoryEntry> deletedEntries) throws IOException {
 System.err.println("DIR: " + path);

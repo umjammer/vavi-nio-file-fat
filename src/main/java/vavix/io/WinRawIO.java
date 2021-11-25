@@ -27,41 +27,41 @@ public class WinRawIO implements IOSource {
     }
 
     @Override
-	public int readSector(byte[] buffer, int sectorNo) throws IOException {
+    public int readSector(byte[] buffer, int sectorNo) throws IOException {
         read(sectorNo, buffer);
         return bytesPerSector;
     }
 
     @Override
     public int getBytesPerSector() {
-    	return bytesPerSector;
+        return bytesPerSector;
     }
 
-    /** */
+    @Override
     protected void finalize() throws Throwable {
         close();
     }
 
     //---- native access ----
 
-    /** ドライブのハンドル */
+    /** set by jni */
     private int handle;
 
-    /** 1 セクタのバイト数 */
+    /** set by jni */
     private int bytesPerSector;
 
     /**
-     * @事後条件 {@link #handle} と {@link #bytesPerSector} が設定されます
+     * @after {@link #handle} and {@link #bytesPerSector} will be set 
      */
     private native void open(String deviceName) throws IOException;
 
     /**
-     * @事前条件 {@link #open(int)} を先に呼んでいる事
+     * @before {@link #open(int)} was called
      */
     private native void read(int sectorNo, byte[] buffer) throws IOException;
 
     /**
-     * @事前条件 {@link #open(int)} を先に呼んでいる事
+     * @before {@link #open(int)} was called
      */
     private native void close() throws IOException;
 

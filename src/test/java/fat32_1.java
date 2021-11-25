@@ -204,7 +204,7 @@ System.err.println("start cluster not found: " + file);
         // 連続しているクラスターを書き出す
         // 途切れたら次の使われていないところ
         //
-        
+
         File output = new File(outdir, file);
         OutputStream os = new FileOutputStream(output);
 
@@ -251,7 +251,7 @@ System.err.println(" salvaged, finish: " + (entry.length() - rest) + "/" + entry
         os.flush();
         os.close();
         output.setLastModified(entry.lastModified());
-            
+
     }
 
     //-------------------------------------------------------------------------
@@ -279,7 +279,7 @@ System.err.println("start cluster not found: " + file);
         // 連続しているクラスターを書き出す
         // 途切れたら終わり
         //
-        
+
         File output = new File(outdir, file);
         OutputStream os = new FileOutputStream(output);
 
@@ -331,7 +331,7 @@ System.err.println("salvage finished: " + (entry.length() - rest) + "/" + entry.
         output.setLastModified(entry.lastModified());
 
         // 途切れたら incomplete を付ける
-        
+
         if (incomplete) {
             output.renameTo(new File(outdir, file + "." + "incomplete"));
         }

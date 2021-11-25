@@ -330,14 +330,14 @@ public class Disk {
         /** 領域情報 */
         @Element(sequence = 2)
         PartEntryAT[] parts = new PartEntryAT[4];
-        /** 予約 */
+        /** 0xaa55 le */
         @Element(sequence = 3)
         byte[] reserved2 = new byte[2];
     }
 
     @Injector
     public static class PartEntryAT {
-        /** 領域状態(0x00:スリープ、0x80:アクティブ) */
+        /** 0x00: non bootable, 0x80: bootable */
         @Element(sequence = 1, value = "unsigned byte")
         int status;
         /** 領域の開始ヘッド */
@@ -346,7 +346,20 @@ public class Disk {
         /** 領域の開始シリンダ・セクタ */
         @Element(sequence = 3, value = "unsigned short")
         int cylsec;
-        /** 領域の種類 */
+        /**
+         * 領域の種類
+         * <ul>
+         * <li> 0x00:不明
+         * <li> 0x01:FAT12
+         * <li> 0x04:FAT16(32MB以下)
+         * <li> 0x05:拡張MSDOS領域
+         * <li> 0x06:FAT16(32MBより大きい)
+         * <li> 0x0B:FAT32
+         * <li> 0x0C:FAT32(LBA 拡張int13h)
+         * <li> 0x0E:FAT16(LBA 拡張int13h)
+         * <li> 0x0F:拡張MSDOS領域(LBA 拡張int13h)
+         * </ul>
+         */
         @Element(sequence = 4, value = "unsigned byte")
         int type;
         /** 領域の終了ヘッド */
@@ -358,7 +371,7 @@ public class Disk {
         /** MBRの先頭から領域の先頭までのセクタ数 */
         @Element(sequence = 7)
         int sec;
-        /** 領域のセクタ数e */
+        /** 領域のセクタ数 */
         @Element(sequence = 8)
         int nsecs;
     }
