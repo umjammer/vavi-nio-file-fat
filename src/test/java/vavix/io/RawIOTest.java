@@ -10,6 +10,8 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import vavi.util.StringUtil;
 
@@ -17,6 +19,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 
+/**
+ * RawIOTest.
+ *
+ * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
+ * @version 0.00 2021/12/03 umjammer initial version <br>
+ */
+@EnabledOnOs(OS.WINDOWS)
 public class RawIOTest {
 
     @Test

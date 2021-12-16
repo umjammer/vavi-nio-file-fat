@@ -15,12 +15,14 @@ import java.util.Scanner;
 import vavi.util.StringUtil;
 
 import vavix.io.WinRawIO;
-import vavix.io.fat32.Fat32;
-import vavix.io.fat32.Fat32.Fat;
+import vavix.io.fat.FileAllocationTable;
+import vavix.io.fat.FileAllocationTable.Fat;
+import vavix.util.ByteArrayMatcher;
+import vavix.util.Matcher;
 
 
 /**
- * fat32_4.
+ * fat32 forensic 4.
  *
  * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version 0.00 2006/01/09 nsano initial version <br>
@@ -40,11 +42,12 @@ public class fat32_4 {
     }
 
     /** */
-    Fat32 fat32;
+    FileAllocationTable fat32;
 
     /** */
     void setUserCluster() throws Exception {
-        Fat fat = fat32.useUserFat();
+        Fat fat = new FileAllocationTable.UserFat32(fat32.bpb, fat32.fat);
+        fat32.setFat(fat);
         //
         Scanner scanner = new Scanner(new FileInputStream("uc1.uc"));
         while (scanner.hasNextInt()) {
@@ -90,11 +93,11 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
      * @param args 0:device, 1:outdir, 2:list file (tsv)
      */
     static void exec5(String[] args) throws Exception {
-        Fat32 fat32 = new Fat32(new WinRawIO(args[0]));
+        FileAllocationTable fat32 = new FileAllocationTable(new WinRawIO(args[0]));
         String file = args[2];
 
         final int plus = 2000;
-        byte[] buffer = new byte[fat32.getBytesPerSector()];
+        byte[] buffer = new byte[fat32.bpb.getBytesPerSector()];
         Scanner scanner = new Scanner(new FileInputStream(file));
         while (scanner.hasNextInt()) {
             int lastCluster = scanner.nextInt();
@@ -126,8 +129,8 @@ System.err.println();
                 if (fat32.isUsing(i)) {
 System.err.println("cluster: " + i + " used, skip");
                 } else {
-                    int targetSector = fat32.getSector(i);
-                    fat32.readSector(buffer, targetSector);
+                    int targetSector = fat32.bpb.toSector(i);
+                    fat32.io().readSector(buffer, targetSector);
 System.err.println("cluster: " + i + ": " + c + "\n" + StringUtil.getDump(buffer, 128));
                     if (c > clusters + plus) {
                         break;
@@ -146,11 +149,13 @@ System.err.println("cluster: " + i + ": " + c + "\n" + StringUtil.getDump(buffer
      * @param args 0:device, 1:outdir, 2:list file (tsv)
      */
     void exec4(String[] args) throws Exception {
-        this.fat32 = new Fat32(new WinRawIO(args[0]));
+        this.fat32 = new FileAllocationTable(new WinRawIO(args[0]));
         String dir = args[1];
         String file = args[2];
 
-        byte[] buffer = new byte[fat32.getBytesPerSector()];
+        int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
+
+        byte[] buffer = new byte[fat32.bpb.getBytesPerSector()];
         File output;
         Scanner scanner = new Scanner(new FileInputStream(file));
         while (scanner.hasNextInt()) {
@@ -169,7 +174,7 @@ System.err.println("\nnot continued, stop");
                     System.err.print("O");
                     System.err.flush();
                     clusterList.add(0, i);
-                    if (clusterList.size() * fat32.getBytesPerCluster() > size) {
+                    if (clusterList.size() * bytesPerCluster > size) {
                         break;
                     }
                 }
@@ -184,17 +189,17 @@ outer:
                 int rest;
                 if (cluster == lastCluster) {
 System.err.print("last cluster: " + cluster);
-                    rest = size % fat32.getBytesPerCluster();
+                    rest = size % bytesPerCluster;
                 } else {
 System.err.print("cluster: " + cluster);
-                    rest = fat32.getBytesPerCluster();
+                    rest = bytesPerCluster;
                 }
-                for (int sector = 0; sector < fat32.getSectorsPerCluster(); sector++) {
-                    int targetSector = fat32.getSector(cluster) + sector;
-                    fat32.readSector(buffer, targetSector);
-                    if (rest >= fat32.getBytesPerSector()) {
-                        os.write(buffer, 0, fat32.getBytesPerSector());
-                        rest -= fat32.getBytesPerSector();
+                for (int sector = 0; sector < fat32.bpb.getSectorsPerCluster(); sector++) {
+                    int targetSector = fat32.bpb.toSector(cluster) + sector;
+                    fat32.io().readSector(buffer, targetSector);
+                    if (rest >= fat32.bpb.getBytesPerSector()) {
+                        os.write(buffer, 0, fat32.bpb.getBytesPerSector());
+                        rest -= fat32.bpb.getBytesPerSector();
                     } else {
                         os.write(buffer, 0, rest);
                         rest -= rest;
@@ -204,7 +209,7 @@ System.err.print("cluster: " + cluster);
 System.err.println(" 2nd parts salvaged");
             }
 
-System.err.println(" 2nd parts salvaged, finish: " + ((clusterList.size() - 1) * fat32.getBytesPerCluster() + (size % fat32.getBytesPerCluster())) + " / " + size);
+System.err.println(" 2nd parts salvaged, finish: " + ((clusterList.size() - 1) * bytesPerCluster + (size % bytesPerCluster)) + " / " + size);
             os.flush();
             os.close();
             output.renameTo(new File(dir, String.valueOf(lastCluster) + ".incomplete"));
@@ -219,8 +224,9 @@ System.err.println(" 2nd parts salvaged, finish: " + ((clusterList.size() - 1) *
      * 3: find 2nd clusters from last cluster (uncontinued clusters ok?), and salvage, sure id3v1
      * @param args 0:device, 1:outdir, 2:list file (tsv)
      */
+    @SuppressWarnings("unused")
     void exec3(String[] args) throws Exception {
-        this.fat32 = new Fat32(new WinRawIO(args[0]));
+        this.fat32 = new FileAllocationTable(new WinRawIO(args[0]));
         String dir = args[1];
         String file = args[2];
 
@@ -250,30 +256,32 @@ System.err.println("lastCluster: " + lastCluster + ", clusters: " + clusters + "
 System.err.println();
 
 if (false) {
+            int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
             output = new File(dir, String.valueOf(lastCluster) + ".dat");
             OutputStream os = new FileOutputStream(output);
             int rest = size;
-            byte[] buffer = new byte[fat32.getBytesPerCluster()];
+            byte[] buffer = new byte[bytesPerCluster];
             boolean found = true;
 outer:
             for (int cluster : clusterList) {
 System.err.print("cluster: " + cluster);
                 fat32.readCluster(buffer, cluster);
-                if (rest > fat32.getBytesPerCluster()) {
-                    os.write(buffer, 0, fat32.getBytesPerCluster());
-                    rest -= fat32.getBytesPerCluster();
+                if (rest > bytesPerCluster) {
+                    os.write(buffer, 0, bytesPerCluster);
+                    rest -= bytesPerCluster;
                 } else {
                     if (found) {
-                        int index = fat32.matcher(buffer).indexOf("TAG".getBytes(), 0);
+                        Matcher<byte[]> matcher = new ByteArrayMatcher(buffer);
+                        int index = matcher.indexOf("TAG".getBytes(), 0);
                         if (index == -1) {
 System.err.println(" tag not found: cluster: " + cluster);
-                            os.write(buffer, 0, fat32.getBytesPerCluster());
-                            rest = fat32.getBytesPerCluster();
+                            os.write(buffer, 0, bytesPerCluster);
+                            rest = bytesPerCluster;
                             continue;
                         } else {
 System.err.print(" tag found: " + (index + 128) + " / " + rest + ", ");
-                            os.write(buffer, 0, (index + 128) % fat32.getBytesPerCluster());
-                            rest -= (index + 128) % fat32.getBytesPerCluster();
+                            os.write(buffer, 0, (index + 128) % bytesPerCluster);
+                            rest -= (index + 128) % bytesPerCluster;
                             if (rest > 0) {
                                 found = true;
                                 continue;
@@ -310,7 +318,7 @@ System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valu
      * @param args 0:device, 1:outdir, 2:list file (tsv)
      */
     void exec2(String[] args) throws Exception {
-        this.fat32 = new Fat32(new WinRawIO(args[0]));
+        this.fat32 = new FileAllocationTable(new WinRawIO(args[0]));
         String dir = args[1];
         String file = args[2];
 
@@ -318,7 +326,7 @@ System.err.println("---- fill deleted clusters");
         setUserCluster();
 System.err.println("----");
 
-        byte[] buffer = new byte[fat32.getBytesPerSector()]; 
+        byte[] buffer = new byte[fat32.bpb.getBytesPerSector()]; 
         File output;
         Scanner scanner = new Scanner(new FileInputStream(file));
         while (scanner.hasNextInt()) {
@@ -351,12 +359,12 @@ System.err.println();
 outer:
             for (int cluster : clusterList) {
 System.err.print("cluster: " + cluster);
-                for (int sector = 0; sector < fat32.getSectorsPerCluster(); sector++) {
-                    int targetSector = fat32.getSector(cluster) + sector;
-                    fat32.readSector(buffer, targetSector);
-                    if (rest > fat32.getBytesPerSector()) {
-                        os.write(buffer, 0, fat32.getBytesPerSector());
-                        rest -= fat32.getBytesPerSector();
+                for (int sector = 0; sector < fat32.bpb.getSectorsPerCluster(); sector++) {
+                    int targetSector = fat32.bpb.toSector(cluster) + sector;
+                    fat32.io().readSector(buffer, targetSector);
+                    if (rest > fat32.bpb.getBytesPerSector()) {
+                        os.write(buffer, 0, fat32.bpb.getBytesPerSector());
+                        rest -= fat32.bpb.getBytesPerSector();
                     } else {
                         os.write(buffer, 0, rest);
                         rest -= rest;
@@ -386,11 +394,11 @@ System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valu
      * @param args 0:device, 1:outdir, 2:list file (csv)
      */
     void exec1(String[] args) throws Exception {
-        this.fat32 = new Fat32(new WinRawIO(args[0]));
+        this.fat32 = new FileAllocationTable(new WinRawIO(args[0]));
         String dir = args[1];
         String file = args[2];
 
-        byte[] buffer = new byte[fat32.getBytesPerSector()]; 
+        byte[] buffer = new byte[fat32.bpb.getBytesPerSector()]; 
         File output;
         Scanner scanner = new Scanner(new FileInputStream(file));
         while (scanner.hasNextInt()) {
@@ -417,12 +425,12 @@ System.err.println("not continued: " + lastCluster);
 outer:
             for (int cluster = lastCluster - clusters + 1; cluster <= lastCluster; cluster++) {
 System.err.print("cluster: " + cluster);
-                for (int sector = 0; sector < fat32.getSectorsPerCluster(); sector++) {
-                    int targetSector = fat32.getSector(cluster) + sector;
-                    fat32.readSector(buffer, targetSector);
-                    if (rest > fat32.getBytesPerSector()) {
-                        os.write(buffer, 0, fat32.getBytesPerSector());
-                        rest -= fat32.getBytesPerSector();
+                for (int sector = 0; sector < fat32.bpb.getSectorsPerCluster(); sector++) {
+                    int targetSector = fat32.bpb.toSector(cluster) + sector;
+                    fat32.io().readSector(buffer, targetSector);
+                    if (rest > fat32.bpb.getBytesPerSector()) {
+                        os.write(buffer, 0, fat32.bpb.getBytesPerSector());
+                        rest -= fat32.bpb.getBytesPerSector();
                     } else {
                         os.write(buffer, 0, rest);
                         rest -= rest;

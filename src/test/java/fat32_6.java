@@ -17,14 +17,14 @@ import java.util.List;
 import java.util.Map;
 
 import vavix.io.WinRawIO;
-import vavix.io.fat32.Fat32;
-import vavix.io.fat32.Fat32.DeletedDirectoryEntry;
-import vavix.io.fat32.Fat32.DosDirectoryEntry;
-import vavix.io.fat32.Fat32.FileEntry;
+import vavix.io.fat.FileAllocationTable;
+import vavix.io.fat.FileAllocationTable.DeletedDirectoryEntry;
+import vavix.io.fat.FileAllocationTable.DosDirectoryEntry;
+import vavix.io.fat.FileAllocationTable.FileEntry;
 
 
 /**
- * fat32_6.
+ * fat32 forensic 6.
  *
  * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version 0.00 2006/01/13 nsano initial version <br>
@@ -39,7 +39,7 @@ public class fat32_6 {
     }
 
     /** */
-    Fat32 fat32;
+    FileAllocationTable fat32;
 
     /** */
     Comparator<DeletedDirectoryEntry> createdAndNameComparator = new Comparator<DeletedDirectoryEntry>() {
@@ -102,7 +102,7 @@ public class fat32_6 {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     fat32_6(String[] args) throws Exception {
         String deviceName = args[0];
-        this.fat32 = new Fat32(new WinRawIO(deviceName));
+        this.fat32 = new FileAllocationTable(new WinRawIO(deviceName));
 
         File cache = new File("deletedEntries.cache");
         List<DeletedDirectoryEntry> deletedEntries;

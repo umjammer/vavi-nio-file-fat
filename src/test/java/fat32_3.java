@@ -13,13 +13,14 @@ import java.util.Scanner;
 import vavi.util.StringUtil;
 
 import vavix.io.WinRawIO;
-import vavix.io.fat32.Fat32;
-import vavix.io.fat32.Fat32.FileEntry;
+import vavix.io.fat.FileAllocationTable;
+import vavix.io.fat.FileAllocationTable.FileEntry;
+import vavix.util.ByteArrayMatcher;
+import vavix.util.Matcher;
 
 
 /**
- * fat32_3.
- * 
+ * fat32 forensic 3.
  *
  * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version 0.00 2006/01/09 nsano initial version <br>
@@ -37,24 +38,26 @@ public class fat32_3 {
      */
     static void exec3(String[] args) throws Exception {
         String deviceName = args[0];
-        Fat32 fat32 = new Fat32(new WinRawIO(deviceName));
+        FileAllocationTable fat32 = new FileAllocationTable(new WinRawIO(deviceName));
         String file = args[1];
         int size = Integer.parseInt(args[2]);
 
 System.err.println("file: " + file);
         Scanner scanner = new Scanner(new FileInputStream(file));
         boolean found = false;
-        byte[] buffer = new byte[fat32.getBytesPerSector()]; 
+        byte[] buffer = new byte[fat32.bpb.getBytesPerSector()]; 
 //outer:
         while (scanner.hasNextInt()) {
             int lastCluster = scanner.nextInt();
 
-            int rest = size % fat32.getBytesPerCluster();
+            int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
+            int rest = size % bytesPerCluster;
 
-            for (int sector = 0; sector < fat32.getSectorsPerCluster(); sector++) {
-                int targetSector = fat32.getSector(lastCluster) + sector;
-                fat32.readSector(buffer, targetSector);
-                int index = fat32.matcher(buffer).indexOf("TAG".getBytes(), 0); // id3 header
+            for (int sector = 0; sector < fat32.bpb.getSectorsPerCluster(); sector++) {
+                int targetSector = fat32.bpb.toSector(lastCluster) + sector;
+                fat32.io().readSector(buffer, targetSector);
+                Matcher<byte[]> matcher = new ByteArrayMatcher(buffer);
+                int index = matcher.indexOf("TAG".getBytes(), 0); // id3 header
                 if (index != -1 && index + 128 == rest) { // id3 size
 System.err.println("found at cluster: " + lastCluster + "\n" + StringUtil.getDump(buffer));
                     found = true;
@@ -62,7 +65,7 @@ System.err.println("found at cluster: " + lastCluster + "\n" + StringUtil.getDum
                 } else {
 //System.err.println("lastCluster: " + lastCluster + ", " + index + " , " + rest);
                 }
-                rest -= fat32.getBytesPerSector();
+                rest -= fat32.bpb.getBytesPerSector();
                 if (rest < 0) {
                     break;
                 }
@@ -82,10 +85,10 @@ System.err.println("found at cluster: " + lastCluster + "\n" + StringUtil.getDum
      */
     static void exec2(String[] args) throws Exception {
         String deviceName = args[0];
-        Fat32 fat32 = new Fat32(new WinRawIO(deviceName));
+        FileAllocationTable fat32 = new FileAllocationTable(new WinRawIO(deviceName));
         Map<String, FileEntry> entries = fat32.getEntries(args[0]);
 
-        byte[] buffer = new byte[fat32.getBytesPerSector()]; 
+        byte[] buffer = new byte[fat32.bpb.getBytesPerSector()]; 
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(args[1])));
         while (reader.ready()) {
             String file = reader.readLine();
@@ -93,11 +96,11 @@ System.err.println("file: " + file);
             if (entries.containsKey(file)) {
                 FileEntry entry = entries.get(file);
 
-                for (int i = 0; i < (fat32.getLastCluster() + 0xffff) / 0x10000; i++) {
+                for (int i = 0; i < (fat32.bpb.getLastCluster() + 0xffff) / 0x10000; i++) {
                     int startCluster = i * 0x10000 + entry.getStartCluster();
 System.err.print("cluster: " + startCluster);
-                    int targetSector = fat32.getSector(startCluster);
-                    fat32.readSector(buffer, targetSector);
+                    int targetSector = fat32.bpb.toSector(startCluster);
+                    fat32.io().readSector(buffer, targetSector);
                     if (buffer[0] == 'I' && buffer[1] == 'D' && buffer[2] == '3') {
 
                         // 使われていたら次
@@ -123,7 +126,7 @@ System.err.println(", startClusterHigh: " + i + "\n" + StringUtil.getDump(buffer
     public static void exec1(String[] args) throws Exception {
         String deviceName = args[0];
 //System.err.println(deviceName + ", " + path + ", " + file);
-        Fat32 fat32 = new Fat32(new WinRawIO(deviceName));
+        FileAllocationTable fat32 = new FileAllocationTable(new WinRawIO(deviceName));
         Map<String, FileEntry> entries = fat32.getEntries(args[0]);
 //for (DirectoryEntry entry : entries.values()) {
 // System.err.println(entry.getName() + ": " + entry.getStartCluster());
