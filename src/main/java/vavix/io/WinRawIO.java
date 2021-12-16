@@ -10,7 +10,7 @@ import java.io.IOException;
 
 
 /**
- * RawIO. 
+ * RawIO.
  *
  * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version 0.00 060108 nsano initial version <br>
