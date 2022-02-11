@@ -86,7 +86,7 @@ public class PC98PartitionEntry {
     public int startSector;
     /** */
     @Element(sequence = 9, value = "unsigned byte")
-    int startHeader;
+    public int startHeader;
     /** 開始シリンダ */
     @Element(sequence = 10, value = "unsigned short")
     public int startCylinder;
@@ -96,10 +96,10 @@ public class PC98PartitionEntry {
     public int endSector;
     /** */
     @Element(sequence = 12, value = "unsigned byte")
-    int endHeader;
+    public int endHeader;
     /** 終了シリンダ */
     @Element(sequence = 13, value = "unsigned short")
-    int endCylinder;
+    public int endCylinder;
 
     /** 領域名(16文字に満たない場合の残りの部分は0x20) */
     @Element(sequence = 14)
