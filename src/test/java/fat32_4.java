@@ -15,8 +15,9 @@ import java.util.Scanner;
 import vavi.util.StringUtil;
 
 import vavix.io.WinRawIO;
+import vavix.io.fat.Fat;
 import vavix.io.fat.FileAllocationTable;
-import vavix.io.fat.FileAllocationTable.Fat;
+import vavix.io.fat.UserFat32;
 import vavix.util.ByteArrayMatcher;
 import vavix.util.Matcher;
 
@@ -46,7 +47,7 @@ public class fat32_4 {
 
     /** */
     void setUserCluster() throws Exception {
-        Fat fat = new FileAllocationTable.UserFat32(fat32.bpb, fat32.fat);
+        Fat fat = new UserFat32(fat32.bpb, fat32.fat);
         fat32.setFat(fat);
         //
         Scanner scanner = new Scanner(new FileInputStream("uc1.uc"));

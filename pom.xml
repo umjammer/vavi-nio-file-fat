@@ -135,8 +135,8 @@
     </dependency>
     <dependency>
       <groupId>vavi</groupId>
-      <artifactId>vavi-util-binarybinding</artifactId>
-      <version>0.0.0-SNAPSHOT</version>
+      <artifactId>vavi-util-binaryio</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>

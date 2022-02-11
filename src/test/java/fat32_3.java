@@ -14,7 +14,7 @@ import vavi.util.StringUtil;
 
 import vavix.io.WinRawIO;
 import vavix.io.fat.FileAllocationTable;
-import vavix.io.fat.FileAllocationTable.FileEntry;
+import vavix.io.fat.FileEntry;
 import vavix.util.ByteArrayMatcher;
 import vavix.util.Matcher;
 

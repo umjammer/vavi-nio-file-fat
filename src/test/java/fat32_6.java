@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.Map;
 
 import vavix.io.WinRawIO;
+import vavix.io.fat.DosDirectoryEntry;
 import vavix.io.fat.FileAllocationTable;
 import vavix.io.fat.FileAllocationTable.DeletedDirectoryEntry;
-import vavix.io.fat.FileAllocationTable.DosDirectoryEntry;
-import vavix.io.fat.FileAllocationTable.FileEntry;
+import vavix.io.fat.FileEntry;
 
 
 /**

@@ -32,6 +32,13 @@ public class WinRawIO implements IOSource {
         return bytesPerSector;
     }
 
+    /**
+     * ignored, because target device is hardware connected.
+     */
+    @Override
+    public void setOffset(long offset) {
+    }
+
     @Override
     public int getBytesPerSector() {
         return bytesPerSector;

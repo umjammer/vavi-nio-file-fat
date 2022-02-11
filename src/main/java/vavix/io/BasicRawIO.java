@@ -13,9 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import vavi.util.Debug;
-import vavi.util.injection.Injector;
-
-import vavix.io.fat.Disk;
 
 
 /**
@@ -28,24 +25,13 @@ public class BasicRawIO implements IOSource {
 
     /** */
     private int bytesPerSector = 512;
-    private int offset;
+    private long offset;
 
     private SeekableByteChannel sbc;
 
     /** */
     public BasicRawIO(String deviceName) throws IOException {
         sbc = Files.newByteChannel(Paths.get(deviceName));
-
-        Disk.MasterBootRecordAT mbr = new Disk.MasterBootRecordAT();
-        Injector.Util.inject(sbc, mbr);
-System.err.println(mbr);
-        Disk.PartEntryAT pe = new Disk.PartEntryAT();
-        for (int i = 0; i < 4; i++) {
-            Injector.Util.inject(sbc, pe);
-if (pe.isBootable()) {
- System.err.println(pe);
-}
-        }
     }
 
     /** */
@@ -60,9 +46,7 @@ if (pe.isBootable()) {
     public int readSector(byte[] buffer, int sectorNo) throws IOException {
 Debug.printf("readSector: %d, %08x\n", sectorNo, sectorNo * bytesPerSector);
         sbc.position(offset + sectorNo * bytesPerSector);
-        ByteBuffer bb = ByteBuffer.allocate(bytesPerSector);
-        sbc.read(bb);
-        System.arraycopy(bb.array(), 0, buffer, 0, bytesPerSector);
+        sbc.read(ByteBuffer.wrap(buffer));
         return bytesPerSector;
     }
 
@@ -71,9 +55,9 @@ Debug.printf("readSector: %d, %08x\n", sectorNo, sectorNo * bytesPerSector);
         return bytesPerSector;
     }
 
-    /** */
-    public void setBytesPerSector(int bytesPerSector) {
-        this.bytesPerSector = bytesPerSector;
+    @Override
+    public void setOffset(long offset) {
+        this.offset = offset;
     }
 }
 

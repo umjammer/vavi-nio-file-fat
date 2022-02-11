@@ -26,6 +26,12 @@ public interface IOSource {
      * Returns bytes per a cluster.
      */
     int getBytesPerSector();
+
+    /**
+     * Sets base offset.
+     * this is used for example to skip virtual disk's header.
+     */
+    void setOffset(long offset);
 }
 
 /* */
