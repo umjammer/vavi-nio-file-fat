@@ -18,15 +18,17 @@ import java.util.Scanner;
 
 import vavi.util.StringUtil;
 
-import vavix.io.fat32.Fat32;
-import vavix.io.fat32.Fat32.DeletedDirectoryEntry;
-import vavix.io.fat32.Fat32.Fat;
-import vavix.io.fat32.Fat32.FileEntry;
-import vavix.io.fat32.Fat32.MatchingStrategy;
+import vavix.io.WinRawIO;
+import vavix.io.fat.Fat;
+import vavix.io.fat.FileAllocationTable;
+import vavix.io.fat.FileAllocationTable.DeletedDirectoryEntry;
+import vavix.io.fat.FileEntry;
+import vavix.io.fat.UserFat32;
+import vavix.util.MatchingStrategy;
 
 
 /**
- * fat32_1.
+ * fat32 forensic 1.
  *
  * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version 0.00 2006/01/09 nsano initial version <br>
@@ -44,10 +46,9 @@ public class fat32_1 {
 
     /** */
     private fat32_1(String[] args) throws Exception {
-        String deviceName = args[0].substring(0, 2);
         String outdir = args[1];
 //System.err.println(deviceName + ", " + path + ", " + file);
-        this.fat32 = new Fat32(deviceName);
+        this.fat32 = new FileAllocationTable(new WinRawIO(args[0]));
         Map<String, FileEntry> entries = fat32.getEntries(args[0]);
 //for (DirectoryEntry entry : entries.values()) {
 // System.err.println(entry.getName() + ": " + entry.getStartCluster());
@@ -75,11 +76,12 @@ System.err.println("file not found: " + file);
     }
 
     /** */
-    Fat32 fat32;
+    FileAllocationTable fat32;
 
     /** */
     void setUserCluster() throws Exception {
-        Fat fat = fat32.useUserFat();
+        Fat fat = new UserFat32(fat32.bpb, fat32.fat);
+        fat32.setFat(fat);
         //
         Scanner scanner = new Scanner(new FileInputStream("uc1.uc"));
         while (scanner.hasNextInt()) {
@@ -134,7 +136,8 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
      */
     void exec3(DeletedDirectoryEntry entry, String outdir, String file) throws Exception {
 
-        byte[] buffer = new byte[fat32.getBytesPerCluster()]; 
+        int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
+        byte[] buffer = new byte[bytesPerCluster]; 
 
         //
         // startClusterHigh を見つける
@@ -155,7 +158,7 @@ System.err.println(entry.getName() + ": " + entry.getStartCluster() + ", " + ent
         int block = 0;
         boolean continued = false;
 //outer:
-        for (int cluster = 0; cluster < fat32.getLastCluster(); cluster++) {
+        for (int cluster = 0; cluster < fat32.bpb.getLastCluster(); cluster++) {
             int targetCluster = startCluster + cluster;
 System.err.print("cluster: " + targetCluster);
 
@@ -189,7 +192,7 @@ System.err.println();
      */
     void exec2(DeletedDirectoryEntry entry, String outdir, String file) throws Exception {
 
-        byte[] buffer = new byte[fat32.getBytesPerSector()];
+        byte[] buffer = new byte[fat32.bpb.getBytesPerSector()];
 
         //
         // startClusterHigh を見つける
@@ -204,7 +207,7 @@ System.err.println("start cluster not found: " + file);
         // 連続しているクラスターを書き出す
         // 途切れたら次の使われていないところ
         //
-        
+
         File output = new File(outdir, file);
         OutputStream os = new FileOutputStream(output);
 
@@ -214,7 +217,7 @@ System.err.println(entry.getName() + ": " + entry.getStartCluster() + ", " + ent
 
 
 outer:
-        for (int cluster = 0; cluster < fat32.getLastCluster(); cluster++) {
+        for (int cluster = 0; cluster < fat32.bpb.getLastCluster(); cluster++) {
             int targetCluster = startCluster + cluster;
 System.err.print("cluster: " + targetCluster);
 
@@ -230,12 +233,12 @@ System.err.println(" has used, skip");
 
             // 1 クラスタの書き出し
 
-            for (int sector = 0; sector < fat32.getSectorsPerCluster(); sector++) {
-                int targetSector = fat32.getSector(targetCluster) + sector;
-                fat32.readSector(buffer, targetSector);
-                if (rest > fat32.getBytesPerSector()) {
-                    os.write(buffer, 0, fat32.getBytesPerSector());
-                    rest -= fat32.getBytesPerSector();
+            for (int sector = 0; sector < fat32.bpb.getSectorsPerCluster(); sector++) {
+                int targetSector = fat32.bpb.toSector(targetCluster) + sector;
+                fat32.io().readSector(buffer, targetSector);
+                if (rest > fat32.bpb.getBytesPerSector()) {
+                    os.write(buffer, 0, fat32.bpb.getBytesPerSector());
+                    rest -= fat32.bpb.getBytesPerSector();
                 } else {
                     os.write(buffer, 0, (int) rest);
                     rest -= rest;
@@ -251,7 +254,7 @@ System.err.println(" salvaged, finish: " + (entry.length() - rest) + "/" + entry
         os.flush();
         os.close();
         output.setLastModified(entry.lastModified());
-            
+
     }
 
     //-------------------------------------------------------------------------
@@ -261,7 +264,7 @@ System.err.println(" salvaged, finish: " + (entry.length() - rest) + "/" + entry
      */
     void exec1(DeletedDirectoryEntry entry, String outdir, String file) throws Exception {
 
-        byte[] buffer = new byte[fat32.getBytesPerSector()];
+        byte[] buffer = new byte[fat32.bpb.getBytesPerSector()];
 
         boolean incomplete = false;
 
@@ -279,7 +282,7 @@ System.err.println("start cluster not found: " + file);
         // 連続しているクラスターを書き出す
         // 途切れたら終わり
         //
-        
+
         File output = new File(outdir, file);
         OutputStream os = new FileOutputStream(output);
 
@@ -289,7 +292,7 @@ System.err.println(entry.getName() + ": " + entry.getStartCluster() + ", " + ent
 
 
 outer:
-        for (int cluster = 0; cluster < fat32.getLastCluster(); cluster++) {
+        for (int cluster = 0; cluster < fat32.bpb.getLastCluster(); cluster++) {
             int targetCluster = startCluster + cluster;
 System.err.print("cluster: " + targetCluster);
 
@@ -308,12 +311,12 @@ System.err.println("salvage, not continued: " + file + ": " + (entry.length() - 
 
             // 1 クラスタの書き出し
 
-            for (int sector = 0; sector < fat32.getSectorsPerCluster(); sector++) {
-                int targetSector = fat32.getSector(targetCluster) + sector;
-                fat32.readSector(buffer, targetSector);
-                if (rest > fat32.getBytesPerSector()) {
-                    os.write(buffer, 0, fat32.getBytesPerSector());
-                    rest -= fat32.getBytesPerSector();
+            for (int sector = 0; sector < fat32.bpb.getSectorsPerCluster(); sector++) {
+                int targetSector = fat32.bpb.toSector(targetCluster) + sector;
+                fat32.io().readSector(buffer, targetSector);
+                if (rest > fat32.bpb.getBytesPerSector()) {
+                    os.write(buffer, 0, fat32.bpb.getBytesPerSector());
+                    rest -= fat32.bpb.getBytesPerSector();
                 } else {
                     os.write(buffer, 0, (int) rest);
                     rest -= rest;
@@ -331,7 +334,7 @@ System.err.println("salvage finished: " + (entry.length() - rest) + "/" + entry.
         output.setLastModified(entry.lastModified());
 
         // 途切れたら incomplete を付ける
-        
+
         if (incomplete) {
             output.renameTo(new File(outdir, file + "." + "incomplete"));
         }

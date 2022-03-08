@@ -1,8 +1,1 @@
-windows.home=${dir.windows}/system32
-jdk.home=c:/usr/local/java
-cygwin.home=c:/usr/local/cygwin
-mingw.include=${cygwin.home}/usr/include/mingw
-w32api.include=${cygwin.home}/usr/include/w32api
-mingw.lib=${cygwin.home}/lib/mingw
-
-dir.native=src/main/jni
+test.fat32.file=/Users/you/test/test.nhd

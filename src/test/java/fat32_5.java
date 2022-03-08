@@ -8,11 +8,14 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
-import vavix.io.fat32.Fat32;
+import vavix.io.WinRawIO;
+import vavix.io.fat.FileAllocationTable;
+import vavix.util.ByteArrayMatcher;
+import vavix.util.Matcher;
 
 
 /**
- * fat32_5.
+ * fat32 forensic 5.
  *
  * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version 0.00 2006/01/09 nsano initial version <br>
@@ -23,12 +26,13 @@ public class fat32_5 {
      * @param args 0:device, 1:cluster list, 2:word
      */
     public static void main(String[] args) throws Exception {
-        Fat32 fat32 = new Fat32(args[0]);
+        FileAllocationTable fat32 = new FileAllocationTable(new WinRawIO(args[0]));
         String file = args[1];
         String word = args[2];
 System.err.println("word: " + word);
 
-        byte[] buffer = new byte[fat32.getBytesPerCluster()]; 
+        int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
+        byte[] buffer = new byte[bytesPerCluster]; 
         boolean found = false;
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
         while (reader.ready()) {
@@ -36,7 +40,8 @@ System.err.println("word: " + word);
             int cluster = Integer.parseInt(line);
 //System.err.println("cluster: " + cluster);
             fat32.readCluster(buffer, cluster);
-            int index = fat32.matcher(buffer).indexOf(word.getBytes(System.getProperty("file.encoding")), 0);
+            Matcher<byte[]> matcher = new ByteArrayMatcher(buffer);
+            int index = matcher.indexOf(word.getBytes(System.getProperty("file.encoding")), 0);
             if (index != -1) {
 System.err.println("\nfound: " + word + " at " + cluster + ", index " + index);
                 found = true;

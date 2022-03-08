@@ -5,11 +5,15 @@
  */
 
 import vavi.util.StringUtil;
-import vavix.io.fat32.Fat32;
+
+import vavix.io.WinRawIO;
+import vavix.io.fat.FileAllocationTable;
+import vavix.util.ByteArrayMatcher;
+import vavix.util.Matcher;
 
 
 /**
- * fat32_2. 
+ * fat32 forensic 2
  *
  * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version 0.00 2006/01/09 nsano initial version <br>
@@ -29,14 +33,16 @@ public class fat32_2 {
      */
     static void exec2(String[] args) throws Exception {
         String deviceName = args[0];
-        Fat32 fat32 = new Fat32(deviceName);
+        FileAllocationTable fat32 = new FileAllocationTable(new WinRawIO(deviceName));
 
-        byte[] buffer = new byte[fat32.getBytesPerCluster()]; 
+        int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
+        byte[] buffer = new byte[bytesPerCluster]; 
         int start = 3;
-        for (int c = start; c < fat32.getLastCluster() + 0xffff; c++) {
+        for (int c = start; c < fat32.bpb.getLastCluster() + 0xffff; c++) {
             if (!fat32.isUsing(c)) {
                 fat32.readCluster(buffer, c);
-                int index = fat32.matcher(buffer).indexOf("TAG".getBytes(), 0);
+                Matcher<byte[]> matcher = new ByteArrayMatcher(buffer);
+                int index = matcher.indexOf("TAG".getBytes(), 0);
                 if (index != -1) {
                     System.err.println("cluster: " + c + " index: " + index + "\n" + StringUtil.getDump(buffer, index, 128));
                 }
@@ -52,13 +58,14 @@ public class fat32_2 {
      */
     static void exec1(String[] args) throws Exception {
         String deviceName = args[0];
-        Fat32 fat32 = new Fat32(deviceName);
+        FileAllocationTable fat32 = new FileAllocationTable(new WinRawIO(deviceName));
 
-        byte[] buffer = new byte[fat32.getBytesPerCluster()]; 
+        int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
+        byte[] buffer = new byte[bytesPerCluster]; 
         int start = 3;
-        for (int c = start; c < fat32.getLastCluster() + 0xffff; c++) {
+        for (int c = start; c < fat32.bpb.getLastCluster() + 0xffff; c++) {
             if (!fat32.isUsing(c)) {
-                fat32.readSector(buffer, c);
+                fat32.io().readSector(buffer, c);
                 if (buffer[0] == 'I' && buffer[1] == 'D' && buffer[2] == '3') {
                     System.err.println("found cluster: " + c + "\n" + StringUtil.getDump(buffer, 128));
                 }
