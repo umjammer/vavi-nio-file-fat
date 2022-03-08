@@ -10,7 +10,7 @@ import java.io.IOException;
 
 
 /**
- * RawIO.
+ * WinRawIO.
  *
  * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version 0.00 060108 nsano initial version <br>
@@ -74,7 +74,7 @@ public class WinRawIO implements IOSource {
 
     /** */
     static {
-        System.loadLibrary("RawIO");
+        System.loadLibrary("WinRawIO");
     }
 }
 
