@@ -14,6 +14,7 @@ package vavix.util;
  * @version 0.00 2021/12/03 umjammer initial version <br>
  */
 public class ByteArrayMatcher implements Matcher<byte[]> {
+
     private byte[] source;
 
     public ByteArrayMatcher(byte[] buffer) {

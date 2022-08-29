@@ -1,5 +1,6 @@
 [![](https://jitpack.io/v/umjammer/vavi-nio-file-fat.svg)](https://jitpack.io/#umjammer/vavi-nio-file-fat)
 [![CodeQL](https://github.com/umjammer/vavi-nio-file-fat/actions/workflows/codeql.yml/badge.svg)](https://github.com/umjammer/vavi-nio-file-fat/actions/workflows/codeql.yml)
+![Java](https://img.shields.io/badge/Java-8-b07219)
 
 # vavi-nio-file-fat
 
