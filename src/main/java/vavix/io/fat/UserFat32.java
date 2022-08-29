@@ -30,13 +30,13 @@ public class UserFat32 implements Fat {
         do {
             clusters.add(cluster);
             cluster = this.clusters[cluster];
-        } while (0000_0002 <= cluster && cluster <= 0x0fff_fff6);
-        return clusters.toArray(new Integer[clusters.size()]);
+        } while (0x0000_0002 <= cluster && cluster <= 0x0fff_fff6);
+        return clusters.toArray(new Integer[0]);
     }
     /** */
     public boolean isUsing(int cluster) throws IOException {
         int value = getClusterValue(cluster);
-        return 0000_0002 <= value && value <= 0x0fff_ffff;
+        return 0x0000_0002 <= value && value <= 0x0fff_ffff;
     }
     /** */
     public void setClusterValue(int cluster, int value) throws IOException {

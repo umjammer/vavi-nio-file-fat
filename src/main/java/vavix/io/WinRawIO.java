@@ -72,7 +72,7 @@ public class WinRawIO implements IOSource {
      */
     private native void close() throws IOException;
 
-    /** */
+    /* */
     static {
         System.loadLibrary("WinRawIO");
     }

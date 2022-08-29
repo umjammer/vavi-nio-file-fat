@@ -45,7 +45,7 @@ public class BasicRawIO implements IOSource {
     @Override
     public int readSector(byte[] buffer, int sectorNo) throws IOException {
 Debug.printf("readSector: %d, %08x\n", sectorNo, sectorNo * bytesPerSector);
-        sbc.position(offset + sectorNo * bytesPerSector);
+        sbc.position(offset + (long) sectorNo * bytesPerSector);
         sbc.read(ByteBuffer.wrap(buffer));
         return bytesPerSector;
     }

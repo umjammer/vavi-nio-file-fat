@@ -25,7 +25,7 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
     byte[] jump = new byte[3];
 
     @Element(sequence = 2, value = "8")
-    public String oemLavel;
+    public String oemLabel;
 
     @Element(sequence = 3, value = "unsigned short")
     int bytesPerSector;
@@ -112,16 +112,16 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
     @Override
     public String toString() {
         return String.format(
-                "BootRecord [jump=%s, oemLavel=%s, bytesPerSector=%s, sectorsPerCluster=%s, reservedSectors=%s, numberOfFAT=%s, maxRootDirectoryEntries=%s, numberOfSmallSectors=%s, mediaDescriptor=%s, numberOfFATSector=%s, numberOfBIOSSector=%s, numberOfBIOSHeader=%s, invisibleSectors=%s, numberOfLargeSectors=%s, osData=%s, volumeSerialID=%s, volumeLabel=%s, fileSystem=%s]",
-                Arrays.toString(jump), oemLavel, bytesPerSector, sectorsPerCluster, reservedSectors, numberOfFAT,
+                "BootRecord [jump=%s, oemLabel=%s, bytesPerSector=%s, sectorsPerCluster=%s, reservedSectors=%s, numberOfFAT=%s, maxRootDirectoryEntries=%s, numberOfSmallSectors=%s, mediaDescriptor=%s, numberOfFATSector=%s, numberOfBIOSSector=%s, numberOfBIOSHeader=%s, invisibleSectors=%s, numberOfLargeSectors=%s, osData=%s, volumeSerialID=%s, volumeLabel=%s, fileSystem=%s]",
+                Arrays.toString(jump), oemLabel, bytesPerSector, sectorsPerCluster, reservedSectors, numberOfFAT,
                 maxRootDirectoryEntries, numberOfSmallSectors, mediaDescriptor, numberOfFATSector, numberOfBIOSSector,
                 numberOfBIOSHeader, invisibleSectors, numberOfLargeSectors, Arrays.toString(osData), volumeSerialID,
-                new String(volumeLabel), new String(fileSystem));
+                volumeLabel, fileSystem);
     }
 
     // TODO
     public boolean validate() {
-        if (!oemLavel.startsWith("NEC")) {
+        if (!oemLabel.startsWith("NEC")) {
             return false;
         }
         return true;
@@ -150,7 +150,7 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
 
     @Override
     public int getLastCluster() {
-        return (int) ((numberOfLargeSectors + (sectorsPerCluster - 1)) / sectorsPerCluster);
+        return (numberOfLargeSectors + (sectorsPerCluster - 1)) / sectorsPerCluster;
     }
 
     @Override

@@ -30,7 +30,6 @@ public enum FatType implements Fat {
      * <li>0000_0002h ~ 0fff_fff6h  next cluster for a file
      * <li>0fff_fff7h               bad cluster
      * <li>0fff_fff8h ~ 0fff_ffffh  last cluster for a file (used 0fff_ffffh normally)
-     * @param cluster cluster
      */
     Fat32Fat {
         /** */
@@ -56,15 +55,15 @@ public enum FatType implements Fat {
 Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
-            } while (0000_0002 <= cluster && cluster <= 0x0fff_fff6);
-            return clusters.toArray(new Integer[clusters.size()]);
+            } while (0x0000_0002 <= cluster && cluster <= 0x0fff_fff6);
+            return clusters.toArray(new Integer[0]);
         }
 
         @Override
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
 Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
-            return 0000_0002 <= cluster && cluster <= 0x0fff_ffff;
+            return 0x0000_0002 <= cluster && cluster <= 0x0fff_ffff;
         }
     },
     Fat16Fat {
@@ -92,15 +91,15 @@ Debug.printf(Level.FINE, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, n
 Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
-            } while (0002 <= cluster && cluster <= 0xfff6);
-            return clusters.toArray(new Integer[clusters.size()]);
+            } while (0x0002 <= cluster && cluster <= 0xfff6);
+            return clusters.toArray(new Integer[0]);
         }
 
         @Override
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
 Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
-            return 0002 <= cluster && cluster <= 0xffff;
+            return 0x0002 <= cluster && cluster <= 0xffff;
         }
     },
     Fat12Fat {
@@ -128,15 +127,15 @@ Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
 //Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
-            } while (002 <= cluster && cluster <= 0xff6);
-            return clusters.toArray(new Integer[clusters.size()]);
+            } while (0x002 <= cluster && cluster <= 0xff6);
+            return clusters.toArray(new Integer[0]);
         }
 
         @Override
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
 //Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
-            return 002 <= cluster && cluster <= 0xfff;
+            return 0x002 <= cluster && cluster <= 0xfff;
         }
     };
 
@@ -168,7 +167,10 @@ Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
     /** TODO thread unsafe */
     protected int currentSector = -1;
 
-    /** TODO thread unsafe */
+    /**
+     * TODO thread unsafe
+     * @param cluster cluster
+     */
     protected abstract int nextCluster(int cluster) throws IOException;
 
     /** */

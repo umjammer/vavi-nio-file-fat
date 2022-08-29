@@ -110,7 +110,7 @@ public class PC98PartitionEntry {
         return String
                 .format("PC98PartitionEntry [mid=%s, sid=%s, dum1=%s, dum2=%s, iplSector=%s, iplHeader=%s, iplCylinder=%s, startSector=%s, startHeader=%s, startCylinder=%s, endSector=%s, endHeader=%s, endCylinder=%s, name=%s]",
                         mid, sid, dum1, dum2, iplSector, iplHeader, iplCylinder, startSector, startHeader, startCylinder, endSector, endHeader, endCylinder,
-                        Arrays.toString(name));
+                        new String(name));
     }
 
     // TODO

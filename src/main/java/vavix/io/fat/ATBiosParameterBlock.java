@@ -27,7 +27,7 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
     byte[] jump = new byte[3];
     /** OEM name */
     @Element(sequence = 2, value = "8")
-    String oemLavel;
+    String oemLabel;
 
     /** logical sector size */
     @Element(sequence = 3, value = "unsigned short")
@@ -207,8 +207,8 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
     @Override
     public String toString() {
         return String
-                .format("BPB [jump=%s, oemLavel=%s, bytesPerSector=%s, sectorsPerCluster=%s, reservedSectors=%s, numberOfFAT=%s, maxRootDirectoryEntries=%s, numberOfSmallSectors=%s, mediaDescriptor=%s, numberOfFATSector=%s, sectorsPerTrack=%s, headsPerDrive=%s, invisibleSectors=%s, numberOfLargeSectors=%s, sectorsPerFAT=%s, %s",
-                        Arrays.toString(jump), oemLavel, bytesPerSector,
+                .format("BPB [jump=%s, oemLabel=%s, bytesPerSector=%s, sectorsPerCluster=%s, reservedSectors=%s, numberOfFAT=%s, maxRootDirectoryEntries=%s, numberOfSmallSectors=%s, mediaDescriptor=%s, numberOfFATSector=%s, sectorsPerTrack=%s, headsPerDrive=%s, invisibleSectors=%s, numberOfLargeSectors=%s, sectorsPerFAT=%s, %s",
+                        Arrays.toString(jump), oemLabel, bytesPerSector,
                         sectorsPerCluster, reservedSectors, numberOfFAT,
                         maxRootDirectoryEntries, numberOfSmallSectors, mediaDescriptor,
                         numberOfFATSector, sectorsPerTrack, headsPerDrive,
@@ -223,7 +223,7 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
 
     @Override
     public int getLastCluster() {
-        return (int) ((numberOfLargeSectors + (sectorsPerCluster - 1)) / sectorsPerCluster);
+        return (numberOfLargeSectors + (sectorsPerCluster - 1)) / sectorsPerCluster;
     }
 
     @Override
