@@ -63,12 +63,12 @@ public class WinRawIO implements IOSource {
     private native void open(String deviceName) throws IOException;
 
     /**
-     * @before {@link #open(int)} was called
+     * @before {@link #open(String)} was called
      */
     private native void read(int sectorNo, byte[] buffer) throws IOException;
 
     /**
-     * @before {@link #open(int)} was called
+     * @before {@link #open(String)} was called
      */
     private native void close() throws IOException;
 

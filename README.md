@@ -1,6 +1,8 @@
 [![](https://jitpack.io/v/umjammer/vavi-nio-file-fat.svg)](https://jitpack.io/#umjammer/vavi-nio-file-fat)
-[![CodeQL](https://github.com/umjammer/vavi-nio-file-fat/actions/workflows/codeql.yml/badge.svg)](https://github.com/umjammer/vavi-nio-file-fat/actions/workflows/codeql.yml)
+[![Java CI with Maven](https://github.com/umjammer/vavi-nio-file/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/umjammer/vavi-nio-file/actions)
+[![CodeQL](https://github.com/umjammer/vavi-nio-file/actions/workflows/codeql.yml/badge.svg)](https://github.com/umjammer/vavi-nio-file/actions/workflows/codeql.yml)
 ![Java](https://img.shields.io/badge/Java-8-b07219)
+[![Parent](https://img.shields.io/badge/Parent-vavi--apps--fuse-pink)](https://github.com/umjammer/vavi-apps-fuse)
 
 # vavi-nio-file-fat
 
