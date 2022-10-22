@@ -56,8 +56,8 @@ public class DosDirectoryEntry implements FileEntry {
         byte[] b1 = new byte[11];
         leis.readFully(b1);
         filename = getPrefixString() + new String(b1, getPrefixString().length(), 8 - getPrefixString().length()).trim();
-        String extention = new String(b1, 8, 3).trim();
-        filename += extention.length() > 0 ? '.' + extention : "";
+        String extension = new String(b1, 8, 3).trim();
+        filename += extension.length() > 0 ? '.' + extension : "";
         attribute = leis.readUnsignedByte();
         capitalFlag = leis.readUnsignedByte();
         int lastCreated10msec = leis.readUnsignedByte();

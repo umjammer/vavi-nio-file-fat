@@ -8,12 +8,15 @@ package vavix.io.fat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.condition.EnabledIf;
 import vavi.util.Debug;
 import vavi.util.properties.annotation.Property;
 import vavi.util.properties.annotation.PropsEntity;
@@ -31,17 +34,18 @@ import vavix.io.partition.ATPartitionEntry;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2021/11/07 umjammer initial version <br>
  */
-//@EnabledIf("localPropertiesExists")
 @PropsEntity(url = "file://${user.dir}/local.properties")
 public class FatTest {
 
-//    static boolean localPropertiesExists() {
-//        return Files.exists(Paths.get("local.properties"));
-//    }
+    static boolean localPropertiesExists() {
+        return Files.exists(Paths.get("local.properties"));
+    }
 
     @BeforeEach
     void setup() throws IOException {
-        PropsEntity.Util.bind(this);
+        if (localPropertiesExists()) {
+            PropsEntity.Util.bind(this);
+        }
     }
 
     @Test
@@ -78,6 +82,7 @@ for (FileEntry entry : entries.values()) {
     }
 
     @Test
+    @EnabledIf("localPropertiesExists")
     @DisplayName("fat32, raw partition")
     public void test2() throws IOException {
         FileAllocationTable fat = new FileAllocationTable(new BasicRawIO(fat32, 512, 0));

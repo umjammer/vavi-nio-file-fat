@@ -5,13 +5,11 @@
  */
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -42,36 +40,22 @@ public class fat32_6 {
     FileAllocationTable fat32;
 
     /** */
-    Comparator<DeletedDirectoryEntry> createdAndNameComparator = new Comparator<DeletedDirectoryEntry>() {
-        public int compare(DeletedDirectoryEntry o1, DeletedDirectoryEntry o2) {
-            if (o1.created() - o2.created() != 0) {
-                return (int) (o1.created() / 1000 - o2.created() / 1000);
-            } else {
-                return o1.getName().compareTo(o2.getName());
-            }
-        }
-    };
-
-    /** */
-    Comparator<DeletedDirectoryEntry> createdComparator = new Comparator<DeletedDirectoryEntry>() {
-        public int compare(DeletedDirectoryEntry o1, DeletedDirectoryEntry o2) {
+    Comparator<DeletedDirectoryEntry> createdAndNameComparator = (o1, o2) -> {
+        if (o1.created() - o2.created() != 0) {
             return (int) (o1.created() / 1000 - o2.created() / 1000);
+        } else {
+            return o1.getName().compareTo(o2.getName());
         }
     };
 
     /** */
-    Comparator<DeletedDirectoryEntry> lastModifiedComparator = new Comparator<DeletedDirectoryEntry>() {
-        public int compare(DeletedDirectoryEntry o1, DeletedDirectoryEntry o2) {
-            return (int) (o1.lastModified() / 1000 - o2.lastModified() / 1000);
-        }
-    };
+    Comparator<DeletedDirectoryEntry> createdComparator = (o1, o2) -> (int) (o1.created() / 1000 - o2.created() / 1000);
 
     /** */
-    Comparator<DeletedDirectoryEntry> lastAccessedComparator = new Comparator<DeletedDirectoryEntry>() {
-        public int compare(DeletedDirectoryEntry o1, DeletedDirectoryEntry o2) {
-            return (int) (o1.lastAccessed() / (1000 * 60 * 60 * 24) - o2.lastAccessed() / (1000 * 60 * 60 * 24));
-        }
-    };
+    Comparator<DeletedDirectoryEntry> lastModifiedComparator = (o1, o2) -> (int) (o1.lastModified() / 1000 - o2.lastModified() / 1000);
+
+    /** */
+    Comparator<DeletedDirectoryEntry> lastAccessedComparator = (o1, o2) -> (int) (o1.lastAccessed() / (1000 * 60 * 60 * 24) - o2.lastAccessed() / (1000 * 60 * 60 * 24));
 
     /** */
 //    FindingStrategy continuousClustersFindingStrategy = new FindingStrategy() {
@@ -111,17 +95,17 @@ public class fat32_6 {
             deletedEntries = new ArrayList<>();
             dig(path, deletedEntries);
 
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cache));
+            ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(cache.toPath()));
             oos.writeObject(deletedEntries);
             oos.flush();
             oos.close();
         } else {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cache));
+            ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(cache.toPath()));
             deletedEntries = (List) ois.readObject();
             ois.close();
         }
 
-        Collections.sort(deletedEntries, createdAndNameComparator);
+        deletedEntries.sort(createdAndNameComparator);
         for (DeletedDirectoryEntry entry : deletedEntries) {
 System.err.printf("%tF, %tF, %tF: %s, %d\n", entry.lastAccessed(), entry.lastModified(), entry.created(), entry.getName(), entry.getStartCluster());
         }

@@ -15,6 +15,7 @@ import vavi.util.serdes.Serdes;
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/02/07 umjammer initial version <br>
+ * @see "http://hp.vector.co.jp/authors/VA013937/editdisk/tech.html"
  */
 @Serdes(bigEndian = false)
 public class ATPartitionEntry {

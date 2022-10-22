@@ -6,18 +6,17 @@
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
 import vavi.util.StringUtil;
-
 import vavix.io.WinRawIO;
 import vavix.io.fat.Fat;
 import vavix.io.fat.FileAllocationTable;
@@ -58,7 +57,7 @@ public class fat32_1 {
 //        setUserCluster();
 //System.err.println("----");
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(args[2])));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(Paths.get(args[2]))));
         while (reader.ready()) {
             String file = reader.readLine();
             if (entries.containsKey(file)) {
@@ -83,7 +82,7 @@ System.err.println("file not found: " + file);
         Fat fat = new UserFat32(fat32.bpb, fat32.fat);
         fat32.setFat(fat);
         //
-        Scanner scanner = new Scanner(new FileInputStream("uc1.uc"));
+        Scanner scanner = new Scanner(Files.newInputStream(Paths.get("uc1.uc")));
         while (scanner.hasNextInt()) {
             // TSV
             int startCluster = scanner.nextInt();
@@ -93,11 +92,11 @@ System.err.println("startCluster: " + startCluster + ", size: " + size);
             for (int i = 0; i < fat32.getRequiredClusters(size); i++) {
                 clusters.add(startCluster + i);
             }
-            fat.setClusterChain(clusters.toArray(new Integer[clusters.size()]));
+            fat.setClusterChain(clusters.toArray(new Integer[0]));
         } 
         scanner.close();
         //
-        scanner = new Scanner(new FileInputStream("uc2.uc"));
+        scanner = new Scanner(Files.newInputStream(Paths.get("uc2.uc")));
         while (scanner.hasNextInt()) {
             // TSV
             int size = scanner.nextInt();
@@ -115,7 +114,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
             for (int i = 0; i < l; i++) {
                 clusters.add(lastCluster - l + 1 + i);
             }
-            fat.setClusterChain(clusters.toArray(new Integer[clusters.size()]));
+            fat.setClusterChain(clusters.toArray(new Integer[0]));
         }
         scanner.close();
     }
@@ -169,7 +168,7 @@ System.err.println(" has used, skip");
                 continued = false;
                 continue;
             } else {
-                if (continued == false) {
+                if (!continued) {
                     continued = true;
                     block++;
 System.err.println(" block: " + block);
@@ -209,7 +208,7 @@ System.err.println("start cluster not found: " + file);
         //
 
         File output = new File(outdir, file);
-        OutputStream os = new FileOutputStream(output);
+        OutputStream os = Files.newOutputStream(output.toPath());
 
 System.err.println(entry.getName() + ": " + entry.getStartCluster() + ", " + entry.length());
 
@@ -254,7 +253,6 @@ System.err.println(" salvaged, finish: " + (entry.length() - rest) + "/" + entry
         os.flush();
         os.close();
         output.setLastModified(entry.lastModified());
-
     }
 
     //-------------------------------------------------------------------------
@@ -284,7 +282,7 @@ System.err.println("start cluster not found: " + file);
         //
 
         File output = new File(outdir, file);
-        OutputStream os = new FileOutputStream(output);
+        OutputStream os = Files.newOutputStream(output.toPath());
 
 System.err.println(entry.getName() + ": " + entry.getStartCluster() + ", " + entry.length());
 

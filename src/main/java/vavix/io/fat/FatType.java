@@ -30,9 +30,8 @@ public enum FatType implements Fat {
      * <li>0000_0002h ~ 0fff_fff6h  next cluster for a file
      * <li>0fff_fff7h               bad cluster
      * <li>0fff_fff8h ~ 0fff_ffffh  last cluster for a file (used 0fff_ffffh normally)
-     * @param cluster cluster
      */
-    Fat32Fat {
+    Fat32Fat(32) {
         /** */
         private static final long serialVersionUID = -8008307331300948383L;
         @Override
@@ -56,18 +55,18 @@ public enum FatType implements Fat {
 Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
-            } while (0000_0002 <= cluster && cluster <= 0x0fff_fff6);
-            return clusters.toArray(new Integer[clusters.size()]);
+            } while (0x0000_0002 <= cluster && cluster <= 0x0fff_fff6);
+            return clusters.toArray(new Integer[0]);
         }
 
         @Override
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
 Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
-            return 0000_0002 <= cluster && cluster <= 0x0fff_ffff;
+            return 0x0000_0002 <= cluster && cluster <= 0x0fff_ffff;
         }
     },
-    Fat16Fat {
+    Fat16Fat(16) {
         /** */
         private static final long serialVersionUID = 1846975683407080677L;
 
@@ -92,18 +91,18 @@ Debug.printf(Level.FINE, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, n
 Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
-            } while (0002 <= cluster && cluster <= 0xfff6);
-            return clusters.toArray(new Integer[clusters.size()]);
+            } while (0x0002 <= cluster && cluster <= 0xfff6);
+            return clusters.toArray(new Integer[0]);
         }
 
         @Override
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
 Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
-            return 0002 <= cluster && cluster <= 0xffff;
+            return 0x0002 <= cluster && cluster <= 0xffff;
         }
     },
-    Fat12Fat {
+    Fat12Fat(12) {
         /** */
         private static final long serialVersionUID = -3706950356198032944L;
 
@@ -128,15 +127,15 @@ Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
 //Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
-            } while (002 <= cluster && cluster <= 0xff6);
-            return clusters.toArray(new Integer[clusters.size()]);
+            } while (0x002 <= cluster && cluster <= 0xff6);
+            return clusters.toArray(new Integer[0]);
         }
 
         @Override
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
 //Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
-            return 002 <= cluster && cluster <= 0xfff;
+            return 0x002 <= cluster && cluster <= 0xfff;
         }
     };
 
@@ -168,7 +167,10 @@ Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
     /** TODO thread unsafe */
     protected int currentSector = -1;
 
-    /** TODO thread unsafe */
+    /**
+     * TODO thread unsafe
+     * @param cluster cluster
+     */
     protected abstract int nextCluster(int cluster) throws IOException;
 
     /** */
@@ -184,6 +186,17 @@ Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
     /** */
     public void setClusterChain(Integer[] clusters) throws IOException {
         throw new UnsupportedOperationException("read only, use #useUserFat()");
+    }
+
+    /** fat bits */
+    final int value;
+
+    FatType(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
     }
 }
 

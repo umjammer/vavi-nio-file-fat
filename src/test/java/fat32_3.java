@@ -5,13 +5,13 @@
  */
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Scanner;
 
 import vavi.util.StringUtil;
-
 import vavix.io.WinRawIO;
 import vavix.io.fat.FileAllocationTable;
 import vavix.io.fat.FileEntry;
@@ -43,7 +43,7 @@ public class fat32_3 {
         int size = Integer.parseInt(args[2]);
 
 System.err.println("file: " + file);
-        Scanner scanner = new Scanner(new FileInputStream(file));
+        Scanner scanner = new Scanner(Files.newInputStream(Paths.get(file)));
         boolean found = false;
         byte[] buffer = new byte[fat32.bpb.getBytesPerSector()]; 
 //outer:
@@ -89,7 +89,7 @@ System.err.println("found at cluster: " + lastCluster + "\n" + StringUtil.getDum
         Map<String, FileEntry> entries = fat32.getEntries(args[0]);
 
         byte[] buffer = new byte[fat32.bpb.getBytesPerSector()]; 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(args[1])));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(Paths.get(args[1]))));
         while (reader.ready()) {
             String file = reader.readLine();
 System.err.println("file: " + file);
@@ -132,7 +132,7 @@ System.err.println(", startClusterHigh: " + i + "\n" + StringUtil.getDump(buffer
 // System.err.println(entry.getName() + ": " + entry.getStartCluster());
 //}
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(args[1])));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(Paths.get(args[1]))));
         while (reader.ready()) {
             String file = reader.readLine();
             if (entries.containsKey(file)) {

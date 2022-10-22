@@ -5,8 +5,9 @@
  */
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import vavix.io.WinRawIO;
 import vavix.io.fat.FileAllocationTable;
@@ -34,7 +35,7 @@ System.err.println("word: " + word);
         int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
         byte[] buffer = new byte[bytesPerCluster]; 
         boolean found = false;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(Paths.get(file))));
         while (reader.ready()) {
             String line = reader.readLine();
             int cluster = Integer.parseInt(line);

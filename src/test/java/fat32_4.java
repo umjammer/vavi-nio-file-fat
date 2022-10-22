@@ -5,15 +5,14 @@
  */
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 import vavi.util.StringUtil;
-
 import vavix.io.WinRawIO;
 import vavix.io.fat.Fat;
 import vavix.io.fat.FileAllocationTable;
@@ -50,7 +49,7 @@ public class fat32_4 {
         Fat fat = new UserFat32(fat32.bpb, fat32.fat);
         fat32.setFat(fat);
         //
-        Scanner scanner = new Scanner(new FileInputStream("uc1.uc"));
+        Scanner scanner = new Scanner(Files.newInputStream(Paths.get("uc1.uc")));
         while (scanner.hasNextInt()) {
             // TSV
             int startCluster = scanner.nextInt();
@@ -60,11 +59,11 @@ System.err.println("startCluster: " + startCluster + ", size: " + size);
             for (int i = 0; i < fat32.getRequiredClusters(size); i++) {
                 clusters.add(startCluster + i);
             }
-            fat.setClusterChain(clusters.toArray(new Integer[clusters.size()]));
+            fat.setClusterChain(clusters.toArray(new Integer[0]));
         } 
         scanner.close();
         //
-        scanner = new Scanner(new FileInputStream("uc2.uc"));
+        scanner = new Scanner(Files.newInputStream(Paths.get("uc2.uc")));
         while (scanner.hasNextInt()) {
             // TSV
             int size = scanner.nextInt();
@@ -82,7 +81,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
             for (int i = 0; i < l; i++) {
                 clusters.add(lastCluster - l + 1 + i);
             }
-            fat.setClusterChain(clusters.toArray(new Integer[clusters.size()]));
+            fat.setClusterChain(clusters.toArray(new Integer[0]));
         }
         scanner.close();
     }
@@ -99,7 +98,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
 
         final int plus = 2000;
         byte[] buffer = new byte[fat32.bpb.getBytesPerSector()];
-        Scanner scanner = new Scanner(new FileInputStream(file));
+        Scanner scanner = new Scanner(Files.newInputStream(Paths.get(file)));
         while (scanner.hasNextInt()) {
             int lastCluster = scanner.nextInt();
             int clusters = scanner.nextInt();
@@ -158,7 +157,7 @@ System.err.println("cluster: " + i + ": " + c + "\n" + StringUtil.getDump(buffer
 
         byte[] buffer = new byte[fat32.bpb.getBytesPerSector()];
         File output;
-        Scanner scanner = new Scanner(new FileInputStream(file));
+        Scanner scanner = new Scanner(Files.newInputStream(Paths.get(file)));
         while (scanner.hasNextInt()) {
             // TSV
             int lastCluster = scanner.nextInt();
@@ -184,7 +183,7 @@ System.err.println("createing " + String.valueOf(lastCluster) + ".dat");
 
 //if (false) {
             output = new File(dir, String.valueOf(lastCluster) + ".dat");
-            OutputStream os = new FileOutputStream(output);
+            OutputStream os = Files.newOutputStream(output.toPath());
 outer:
             for (int cluster : clusterList) {
                 int rest;
@@ -232,7 +231,7 @@ System.err.println(" 2nd parts salvaged, finish: " + ((clusterList.size() - 1) *
         String file = args[2];
 
         File output;
-        Scanner scanner = new Scanner(new FileInputStream(file));
+        Scanner scanner = new Scanner(Files.newInputStream(Paths.get(file)));
         while (scanner.hasNextInt()) {
             int lastCluster = scanner.nextInt();
             int clusters = scanner.nextInt();
@@ -259,7 +258,7 @@ System.err.println();
 if (false) {
             int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
             output = new File(dir, String.valueOf(lastCluster) + ".dat");
-            OutputStream os = new FileOutputStream(output);
+            OutputStream os = Files.newOutputStream(output.toPath());
             int rest = size;
             byte[] buffer = new byte[bytesPerCluster];
             boolean found = true;
@@ -302,7 +301,7 @@ System.err.println(" 2nd parts salvaged: " + (size - rest) + " / " + size + "\n"
             os.flush();
             os.close();
             if (!continued) {
-                output.renameTo(new File(dir, String.valueOf(lastCluster) + ".incomplete"));
+                output.renameTo(new File(dir, lastCluster + ".incomplete"));
             } else {
 System.err.println(" 2nd parts salvaged, finish: " + (size - rest) + " / " + size);
 System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valueOf(lastCluster) + ".dat > " + dir + "/$1");
@@ -329,7 +328,7 @@ System.err.println("----");
 
         byte[] buffer = new byte[fat32.bpb.getBytesPerSector()]; 
         File output;
-        Scanner scanner = new Scanner(new FileInputStream(file));
+        Scanner scanner = new Scanner(Files.newInputStream(Paths.get(file)));
         while (scanner.hasNextInt()) {
             int lastCluster = scanner.nextInt();
             int clusters = scanner.nextInt();
@@ -355,7 +354,7 @@ System.err.println();
 
 //if (false) {
             output = new File(dir, String.valueOf(lastCluster) + ".dat");
-            OutputStream os = new FileOutputStream(output);
+            OutputStream os = Files.newOutputStream(output.toPath());
             int rest = size;
 outer:
             for (int cluster : clusterList) {
@@ -378,7 +377,7 @@ System.err.println(" 2nd parts salvaged: " + (size - rest) + " / " + size);
             os.flush();
             os.close();
             if (!continued) {
-                output.renameTo(new File(dir, String.valueOf(lastCluster) + ".incomplete"));
+                output.renameTo(new File(dir, lastCluster + ".incomplete"));
             } else {
 System.err.println(" 2nd parts salvaged, finish: " + (size - rest) + " / " + size);
 System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valueOf(lastCluster) + ".dat > " + dir + "/$1");
@@ -401,7 +400,7 @@ System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valu
 
         byte[] buffer = new byte[fat32.bpb.getBytesPerSector()]; 
         File output;
-        Scanner scanner = new Scanner(new FileInputStream(file));
+        Scanner scanner = new Scanner(Files.newInputStream(Paths.get(file)));
         while (scanner.hasNextInt()) {
             int lastCluster = scanner.nextInt();
             int clusters = scanner.nextInt();
@@ -420,8 +419,8 @@ System.err.println("not continued: " + lastCluster);
             }
 
 //if (false) {
-            output = new File(dir, String.valueOf(lastCluster) + ".dat");
-            OutputStream os = new FileOutputStream(output);
+            output = new File(dir, lastCluster + ".dat");
+            OutputStream os = Files.newOutputStream(output.toPath());
             int rest = size;
 outer:
             for (int cluster = lastCluster - clusters + 1; cluster <= lastCluster; cluster++) {
@@ -444,7 +443,7 @@ System.err.println(" 2nd parts salvaged: " + (size - rest) + " / " + size);
             os.flush();
             os.close();
             if (!continued) {
-                output.renameTo(new File(dir, String.valueOf(lastCluster) + ".incomplete"));
+                output.renameTo(new File(dir, lastCluster + ".incomplete"));
             } else {
 System.err.println(" 2nd parts salvaged, finish: " + (size - rest) + " / " + size);
 System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valueOf(lastCluster) + ".dat > " + dir + "/$1");

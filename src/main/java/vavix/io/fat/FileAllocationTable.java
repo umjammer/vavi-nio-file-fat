@@ -152,11 +152,11 @@ if (clusters.length > fcs) {
 }
             List<LongNameDirectoryEntry> deletedLongNames = new ArrayList<>();
             SortedSet<LongNameDirectoryEntry> tempraryLongNames = new TreeSet<>();
-            for (int cluster = 0; cluster < clusters.length; cluster++) {
+            for (int cluster : clusters) {
                 for (int sector = 0; sector < bpb.getSectorsPerCluster(); sector++) {
 //Debug.println(Level.FINE, "sector: " + (bpb.getSector(clusters[cluster]) + sector));
-                    byte[] buffer = new byte[1024]; 
-                    io.readSector(buffer, bpb.toSector(clusters[cluster]) + sector);
+                    byte[] buffer = new byte[1024];
+                    io.readSector(buffer, bpb.toSector(cluster) + sector);
                     for (int entry = 0; entry < io.getBytesPerSector() / 32; entry++) {
 //Debug.println(Level.FINE, "entry:\n" + StringUtil.getDump(buffer, entry * 32, 32));
                         DataInput ledi = new LittleEndianDataInputStream(new ByteArrayInputStream(buffer, entry * 32, 32));
@@ -184,7 +184,7 @@ if (clusters.length > fcs) {
                                 }
                             }
                         }
-                            break;
+                        break;
                         default: {
                             if (attributeByte == 0x0f) {
                                 LongNameDirectoryEntry directoryEntry = new LongNameDirectoryEntry(ledi);
@@ -200,7 +200,7 @@ if (clusters.length > fcs) {
                                 entries.put(directoryEntry.getName(), directoryEntry);
                             }
                         }
-                            break;
+                        break;
                         }
                     }
                 }
@@ -267,7 +267,7 @@ Debug.println("bps: " + bps);
         Serdes.Util.deserialize(new ByteArrayInputStream(bytes), bpb);
         fat = bpb.getFatType();
 Debug.println("fat: " + fat);
-        FatType.class.cast(fat).setRuntimeContext(io, bpb);
+        ((FatType) fat).setRuntimeContext(io, bpb);
     }
 
     /** */
@@ -276,7 +276,7 @@ Debug.println("fat: " + fat);
         this.bpb = bpb;
         fat = bpb.getFatType();
 Debug.println("fat: " + fat);
-        FatType.class.cast(fat).setRuntimeContext(io, bpb);
+        ((FatType) fat).setRuntimeContext(io, bpb);
     }
 }
 

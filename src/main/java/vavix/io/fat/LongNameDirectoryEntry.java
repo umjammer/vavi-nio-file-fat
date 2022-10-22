@@ -8,7 +8,7 @@ package vavix.io.fat;
 
 import java.io.DataInput;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 
 import vavi.util.Debug;
@@ -42,18 +42,18 @@ class LongNameDirectoryEntry implements DirectoryEntry, Comparable<LongNameDirec
         isLast = (sequenceByte & 0x40) != 0;
         byte[] b1 = new byte[10];
         leis.readFully(b1);
-        filename = new String(b1, 0, 10, Charset.forName("UTF-16LE"));
+        filename = new String(b1, 0, 10, StandardCharsets.UTF_16LE);
         attribute = leis.readUnsignedByte(); 
         leis.readUnsignedByte(); // longEntryType
         shortNameCheckSum = leis.readUnsignedByte();
         byte[] b2 = new byte[12];
         leis.readFully(b2);
-        filename += new String(b2, 0, 12, Charset.forName("UTF-16LE"));
+        filename += new String(b2, 0, 12, StandardCharsets.UTF_16LE);
         byte[] b3 = new byte[2];
         leis.readFully(b3);
         byte[] b4 = new byte[4];
         leis.readFully(b4);
-        filename += new String(b4, 0, 4, Charset.forName("UTF-16LE"));
+        filename += new String(b4, 0, 4, StandardCharsets.UTF_16LE);
         int p = filename.indexOf(0);
         if (p != -1) {
             filename = filename.substring(0, p);
