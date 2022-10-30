@@ -1,14 +1,16 @@
-/*
+package ipod;/*
  * Copyright (c) 2022 by Naohide Sano, All rights reserved.
  *
  * Programmed by Naohide Sano
  */
 
-package vavix.io.fat;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import vavix.io.fat.BiosParameterBlock;
+import vavix.io.fat.Fat;
+
 
 /** */
 public class UserFat32 implements Fat {
