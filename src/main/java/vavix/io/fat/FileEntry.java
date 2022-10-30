@@ -6,6 +6,7 @@
 
 package vavix.io.fat;
 
+import java.io.InputStream;
 import java.util.Collection;
 
 
@@ -16,14 +17,16 @@ import java.util.Collection;
  * @version 0.00 2022/02/08 umjammer initial version <br>
  */
 public interface FileEntry extends DirectoryEntry, Comparable<FileEntry> {
+
     boolean isDirectory();
 
     String getName();
 
     int getStartCluster();
 
-    void setLongName(Collection<LongNameDirectoryEntry> longNames);
+    void setLongName(Collection<LongNameFileEntry> longNames);
 
+    /** file size */
     long length();
 
     long lastModified();

@@ -99,8 +99,7 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
         String fileSystemType;
         @Override
         public String toString() {
-            return String
-                    .format("Fat [driveNumber=%s, b1=%s, bootSignature=%s, volumeSerialID=%s, volumeLavel=%s, fileSystemType=%s]",
+            return String.format("Fat [driveNumber=%s, b1=%s, bootSignature=%s, volumeSerialID=%s, volumeLavel=%s, fileSystemType=%s]",
                             driveNumber, b1, bootSignature, volumeSerialID, volumeLavel, fileSystemType);
         }
     }
@@ -143,8 +142,9 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
         String fileSystemType;
         @Override
         public String toString() {
-            return String
-                    .format("Fat32 [mediaDescriptionFlag=%s, fileSystemVersion=%s, startClusterOfRootDirectory=%s, sectorOfFSInfo=%s, sectorOfCopyBootSector=%s, b3=%s, physicalDriveNumber=%s, b4=%s, bootSignature=%s, volumeSerialID=%s, volumeLavel=%s, fileSystemType=%s]",
+            return String.format("Fat32 [mediaDescriptionFlag=%s, fileSystemVersion=%s, startClusterOfRootDirectory=%s, " +
+                            "sectorOfFSInfo=%s, sectorOfCopyBootSector=%s, b3=%s, physicalDriveNumber=%s, b4=%s, bootSignature=%s, " +
+                            "volumeSerialID=%s, volumeLavel=%s, fileSystemType=%s]",
                             mediaDescriptionFlag, fileSystemVersion, startClusterOfRootDirectory, sectorOfFSInfo,
                             sectorOfCopyBootSector, Arrays.toString(b3), physicalDriveNumber, b4,
                             bootSignature, volumeSerialID, volumeLavel, fileSystemType);
@@ -159,9 +159,11 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
 
     private int firstDataSector;
 
+    private int rootDirSectors;
+
     /** using jnode algorithm */
     public boolean condition2(int sequence) {
-        int rootDirSectors = ((maxRootDirectoryEntries * 32) + (bytesPerSector - 1)) / bytesPerSector;
+        rootDirSectors = ((maxRootDirectoryEntries * 32) + (bytesPerSector - 1)) / bytesPerSector;
 
         if (numberOfFATSector != 0)
             fatSize = numberOfFATSector;
@@ -206,8 +208,9 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
 
     @Override
     public String toString() {
-        return String
-                .format("BPB [jump=%s, oemLabel=%s, bytesPerSector=%s, sectorsPerCluster=%s, reservedSectors=%s, numberOfFAT=%s, maxRootDirectoryEntries=%s, numberOfSmallSectors=%s, mediaDescriptor=%s, numberOfFATSector=%s, sectorsPerTrack=%s, headsPerDrive=%s, invisibleSectors=%s, numberOfLargeSectors=%s, sectorsPerFAT=%s, %s",
+        return String.format("BPB [jump=%s, oemLabel=%s, bytesPerSector=%s, sectorsPerCluster=%s, reservedSectors=%s, " +
+                        "numberOfFAT=%s, maxRootDirectoryEntries=%s, numberOfSmallSectors=%s, mediaDescriptor=%s, numberOfFATSector=%s, " +
+                        "sectorsPerTrack=%s, headsPerDrive=%s, invisibleSectors=%s, numberOfLargeSectors=%s, sectorsPerFAT=%s, %s",
                         Arrays.toString(jump), oemLabel, bytesPerSector,
                         sectorsPerCluster, reservedSectors, numberOfFAT,
                         maxRootDirectoryEntries, numberOfSmallSectors, mediaDescriptor,
@@ -245,9 +248,11 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
     public int toSector(int cluster) {
         switch (type) {
         case Fat32Fat:
-            return (cluster - 2) * sectorsPerCluster + firstDataSector;
         default:
-            return firstDataSector;
+            return (cluster - 2) * sectorsPerCluster + firstDataSector;
+        case Fat16Fat:
+        case Fat12Fat:
+            return cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
         }
     }
 

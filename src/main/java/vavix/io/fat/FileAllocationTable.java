@@ -7,11 +7,14 @@
 package vavix.io.fat;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -58,10 +61,10 @@ public class FileAllocationTable implements Serializable {
     }
 
     /**
-     * DeletedDirectoryEntry.
-     * {@link DosDirectoryEntry#lastAccessed()} is the date deleted.
+     * DeletedFileEntry.
+     * {@link DosFileEntry#lastAccessed()} is the date deleted.
      */
-    public class DeletedDirectoryEntry extends DosDirectoryEntry {
+    public class DeletedFileEntry extends DosFileEntry {
         /** */
         private static final long serialVersionUID = -8752690030998809470L;
         /** */
@@ -71,7 +74,7 @@ public class FileAllocationTable implements Serializable {
             return "_";
         }
         /** */
-        DeletedDirectoryEntry(DataInput is) throws IOException {
+        DeletedFileEntry(DataInput is) throws IOException {
             super(is);
         }
         /**
@@ -117,41 +120,62 @@ System.err.println("startCluster: " + this.startCluster + " -> " + (startCluster
 
     /** */
     class Directory {
-        /** */
-        Map<String, FileEntry> entries;
+        /** &gt;path, entries&lt; */
+        Map<String, Map<String, FileEntry>> entriesMap = new HashMap<>();
+
         /**
          * @param path F:\xxx\yyy
          */
-        Directory(String path) throws IOException {
-//Debug.println(Level.FINE, "**** directory: \\");
+        Map<String, FileEntry> getEntries(String path) throws IOException {
             if (path.indexOf(':') == 1) {
                 path = path.substring(2);
             }
-            entries = getEntries(bpb.getStartClusterOfRootDirectory());
+            path = path.replaceFirst("\\\\$", "");
+//Debug.println(Level.FINER, "**** path: [" + path + "]");
+            Map<String, FileEntry> entries = entriesMap.get(path);
+            if (entries != null) {
+                return entries;
+            } else {
+                entries = entriesMap.get("");
+                if (entries == null) {
+                    entries = getEntries(bpb.getStartClusterOfRootDirectory());
+//Debug.println(Level.FINER, "**** entries: \\ (" + bpb.getStartClusterOfRootDirectory() + "): " + entries.values());
+                    entriesMap.put("", entries);
+                }
+            }
+            if (path.equals("")) {
+//Debug.println(Level.FINER, "<<<<<<<<<<<: \\: " + entries.values());
+                return entries;
+            }
             StringTokenizer st = new StringTokenizer(path, "\\");
             while (st.hasMoreTokens()) {
                 String directory = st.nextToken();
-//Debug.println(Level.FINE, "**** directory: " + directory);
-                if (entries.containsKey(directory)) {
-                    entries = getEntries(entries.get(directory).getStartCluster());
+//Debug.println(Level.FINER, "**** directory: [" + directory + "]");
+                FileEntry entry = entries.get(directory);
+                if (entry != null) {
+                    entries = getEntries(entry.getStartCluster());
+//Debug.println(Level.FINER, "**** entries: " + directory + " (" + entry.getStartCluster() + "): " + entries.values());
+                    entriesMap.put(path + "\\" + directory, entries);
                 } else {
                     throw new IllegalArgumentException("no such directory: " + directory);
                 }
             }
+//Debug.println(Level.FINER, "<<<<<<<<<<<: " + path + ": " + entries.values());
+            return entries;
         }
-        /** */
+        /** &lt;file name, file entry&gt; */
         Map<String, FileEntry> getEntries(int startCluster) throws IOException {
             SortedMap<String, FileEntry> entries = new TreeMap<>();
             Integer[] clusters = fat.getClusterChain(startCluster);
-Debug.println(Level.FINE, "clusters: " + Arrays.toString(clusters));
+Debug.println(Level.FINE, "clusters: " + Arrays.toString(clusters) + ", spc: " + bpb.getSectorsPerCluster());
 int fcs = (bpb.getFatSectors() / bpb.getSectorsPerCluster());
 Debug.println(Level.FINE, "fat secs: " + bpb.getFatSectors() + ", sec per cluster: " + bpb.getSectorsPerCluster());
 if (clusters.length > fcs) {
+ Debug.println(Level.WARNING, "clusters is larger than definitions, shorten: " + clusters.length + " -> " + fcs);
  clusters = Arrays.copyOfRange(clusters, 0, fcs);
- Debug.println(Level.WARNING, "clusters is larger than definitions, shorten: " + clusters.length);
 }
-            List<LongNameDirectoryEntry> deletedLongNames = new ArrayList<>();
-            SortedSet<LongNameDirectoryEntry> tempraryLongNames = new TreeSet<>();
+            List<LongNameFileEntry> deletedLongNames = new ArrayList<>();
+            SortedSet<LongNameFileEntry> temporaryLongNames = new TreeSet<>();
             for (int cluster : clusters) {
                 for (int sector = 0; sector < bpb.getSectorsPerCluster(); sector++) {
 //Debug.println(Level.FINE, "sector: " + (bpb.getSector(clusters[cluster]) + sector));
@@ -166,38 +190,38 @@ if (clusters.length > fcs) {
                         case 0x00:
 //Debug.println(Level.FINE, "none");
                             break;
-                        case 0xe5: {
-                            if (attributeByte == 0x0f) {
-                                LongNameDirectoryEntry directoryEntry = new DeletedLongNameDirectoryEntry(ledi);
-                                deletedLongNames.add(0, directoryEntry);
+                        case 0xe5: { // deleted
+                            if (attributeByte == 0x0f) { // has long name
+                                LongNameFileEntry fileEntry = new DeletedLongNameFileEntry(ledi);
+                                deletedLongNames.add(0, fileEntry);
                             } else {
-                                FileEntry directoryEntry = new DeletedDirectoryEntry(ledi);
-//Debug.println(Level.FINE, StringUtil.paramString(directoryEntry));
+                                DeletedFileEntry fileEntry = new DeletedFileEntry(ledi);
+//Debug.println(Level.FINE, StringUtil.paramString(fileEntry));
                                 if (deletedLongNames.size() != 0) {
-                                    directoryEntry.setLongName(deletedLongNames);
+                                    fileEntry.setLongName(deletedLongNames);
                                     deletedLongNames.clear();
                                 }
-                                if (entries.containsKey(directoryEntry.getName())) {
-                                    entries.put(((DeletedDirectoryEntry) directoryEntry).filename, directoryEntry);
+                                if (entries.containsKey(fileEntry.getName())) {
+                                    entries.put(fileEntry.filename, fileEntry);
                                 } else {
-                                    entries.put(directoryEntry.getName(), directoryEntry);
+                                    entries.put(fileEntry.getName(), fileEntry);
                                 }
                             }
                         }
                         break;
-                        default: {
-                            if (attributeByte == 0x0f) {
-                                LongNameDirectoryEntry directoryEntry = new LongNameDirectoryEntry(ledi);
-//Debug.println(Level.FINE, StringUtil.paramString(directoryEntry));
-                                tempraryLongNames.add(directoryEntry);
+                        default: { // normal
+                            if (attributeByte == 0x0f) { // has long name
+                                LongNameFileEntry fileEntry = new LongNameFileEntry(ledi);
+//Debug.println(Level.FINE, StringUtil.paramString(fileEntry));
+                                temporaryLongNames.add(fileEntry);
                             } else {
-                                FileEntry directoryEntry = new DosDirectoryEntry(ledi);
-//Debug.println(Level.FINE, StringUtil.paramString(directoryEntry));
-                                if (tempraryLongNames.size() != 0) {
-                                    directoryEntry.setLongName(tempraryLongNames);
-                                    tempraryLongNames.clear();
+                                FileEntry fileEntry = new DosFileEntry(ledi);
+//Debug.println(Level.FINE, StringUtil.paramString(fileEntry));
+                                if (temporaryLongNames.size() != 0) {
+                                    fileEntry.setLongName(temporaryLongNames);
+                                    temporaryLongNames.clear();
                                 }
-                                entries.put(directoryEntry.getName(), directoryEntry);
+                                entries.put(fileEntry.getName(), fileEntry);
                             }
                         }
                         break;
@@ -237,7 +261,7 @@ if (clusters.length > fcs) {
         return fat.isUsing(cluster);
     }
 
-    /** */
+    /** @param buffer cluster bytes needed */
     public int readCluster(byte[] buffer, int cluster) throws IOException {
         byte[] buf = new byte[bpb.getBytesPerSector()];
         for (int sector = 0; sector < bpb.getSectorsPerCluster(); sector++) {
@@ -248,35 +272,56 @@ if (clusters.length > fcs) {
         return bpb.getSectorsPerCluster() * bpb.getBytesPerSector();
     }
 
+    private Directory directory = new Directory();
+
     /**
      * The entry point.
+     * @return includes deleted entries
      */
     public Map<String, FileEntry> getEntries(String path) throws IOException {
-        Directory directory = new Directory(path);
-        return directory.entries;
+        return directory.getEntries(path);
     }
 
-    /** */
+    /** constructor */
     public FileAllocationTable(IOSource io) throws IOException {
         this.io = io;
         int bps = io.getBytesPerSector();
-Debug.println("bps: " + bps);
+Debug.println(Level.FINE, "bps: " + bps);
         byte[] bytes = new byte[bps];
         io.readSector(bytes, 0);
         bpb = new ATBiosParameterBlock();
         Serdes.Util.deserialize(new ByteArrayInputStream(bytes), bpb);
         fat = bpb.getFatType();
-Debug.println("fat: " + fat);
+Debug.println(Level.FINE, "fat: " + fat);
         ((FatType) fat).setRuntimeContext(io, bpb);
     }
 
-    /** */
+    /** constructor */
     public FileAllocationTable(IOSource io, BiosParameterBlock bpb) throws IOException {
         this.io = io;
         this.bpb = bpb;
         fat = bpb.getFatType();
-Debug.println("fat: " + fat);
+Debug.println(Level.FINE, "fat: " + fat);
         ((FatType) fat).setRuntimeContext(io, bpb);
+    }
+
+    /** get contents of the entry */
+    public InputStream getData(FileEntry entry) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int bytesPerCluster = bpb.getSectorsPerCluster() * bpb.getBytesPerSector();
+        byte[] buf = new byte[bytesPerCluster];
+        Integer[] clusterChain = fat.getClusterChain(entry.getStartCluster());
+        for (int cluster : clusterChain) {
+            int l = readCluster(buf, cluster);
+//if (cluster == clusterChain[0]) {
+// Debug.println(Level.FINE, "start cluster: " + cluster + " = sector: " + bpb.toSector(cluster) + ", " + + l + " bytes\n" + StringUtil.getDump(buf, 64));
+//}
+            if (cluster == clusterChain[clusterChain.length - 1]) {
+                l = (int) (entry.length() % bytesPerCluster);
+            }
+            baos.write(buf, 0, l);
+        }
+        return new ByteArrayInputStream(baos.toByteArray());
     }
 }
 

@@ -18,7 +18,7 @@ import vavi.util.serdes.Serdes;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/02/07 umjammer initial version <br>
  */
-@Serdes(bigEndian = false)
+@Serdes(bigEndian = false, encoding = "MS932")
 public class PC98BiosParameterBlock implements BiosParameterBlock {
 
     @Element(sequence = 1)
@@ -70,6 +70,9 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
     /** */
     private FatType type;
 
+    /** */
+    private int rootDirSectors;
+
     /**
      * do after injection
      *
@@ -78,8 +81,7 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
      * @after #type
      */
     public void compute() {
-        //
-        int rootDirSectors = ((maxRootDirectoryEntries * 32) + (getBytesPerSector() - 1)) / getBytesPerSector();
+        rootDirSectors = ((maxRootDirectoryEntries * 32) + (getBytesPerSector() - 1)) / getBytesPerSector();
 
         int totalSectors;
         if (numberOfSmallSectors != 0)
@@ -97,7 +99,6 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
             type = FatType.Fat16Fat;
         else
             type = FatType.Fat32Fat;
-
 
         switch (getFatType()) {
         case Fat32Fat:
@@ -155,8 +156,15 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
 
     @Override
     public int toSector(int cluster) {
-        int sector = cluster * sectorsPerCluster;
-        return sector;
+//Debug.printf(Level.FINER, "cluster: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d", cluster, firstDataSector, rootDirSectors, sectorsPerCluster);
+        switch (type) {
+        case Fat32Fat:
+        default:
+            return (cluster - 2) * sectorsPerCluster + firstDataSector;
+        case Fat16Fat:
+        case Fat12Fat:
+            return cluster == firstDataSector ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
+        }
     }
 
     @Override
