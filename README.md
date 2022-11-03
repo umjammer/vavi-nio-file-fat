@@ -13,7 +13,8 @@
 | fs         | list | upload | download | copy | move | rm | mkdir | cache |
 |------------|------|--------|----------|------|------|----|-------|-------|
 | FAT12 (98) | ✅   |        | ✅        |      |   |  |    |    |
-| FAT12 (AT) | ✅   |        | 🚧       |      |   |  |    |    |
+| FAT12 (AT) | ✅   |        | ?        |      |   |  |    |    |
+| FAT16 (98) | ✅   |        | ✅        |      |   |  |    |    |
 | FAT16 (AT) | ✅   |        | ✅        |      |   |  |    |    |
 | FAT32 (AT) | ✅   |        | ✅        |      |   |  |    |    |
 
@@ -25,3 +26,4 @@
 
  * https://github.com/barbeque/pc98-disk-tools
  * https://www.pc98.org/main.html
+ * http://elm-chan.org/docs/fat.html
