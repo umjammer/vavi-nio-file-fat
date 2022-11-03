@@ -8,7 +8,7 @@
 
   <groupId>vavi</groupId>
   <artifactId>vavi-nio-file-fat</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
 
   <name>java nio file FAT SPI</name>
   <organization>
@@ -150,7 +150,7 @@
     <dependency>
       <groupId>com.github.umjammer</groupId>
       <artifactId>vavi-util-serdes</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.2</version>
     </dependency>
 
     <dependency>

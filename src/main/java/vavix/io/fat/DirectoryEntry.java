@@ -6,7 +6,7 @@
 
 package vavix.io.fat;
 
-import java.io.Serializable;
+import java.util.List;
 
 
 /**
@@ -15,7 +15,19 @@ import java.io.Serializable;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/02/08 umjammer initial version <br>
  */
-public interface DirectoryEntry extends Serializable {
+public interface DirectoryEntry extends FileEntry {
+
+    /** */
+    List<FileEntry> entries();
+
+    /** */
+    void setEntries(List<FileEntry> entries);
+
+    /**
+     * Finds a {@link FileEntry} named <code>filename</code> contained in <code>this</code>
+     * @param filename filename not path
+     */
+    FileEntry find(String filename);
 }
 
 /* */

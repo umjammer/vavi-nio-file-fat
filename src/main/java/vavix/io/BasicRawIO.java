@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.logging.Level;
 
 import vavi.util.Debug;
 
@@ -44,7 +45,7 @@ public class BasicRawIO implements IOSource {
 
     @Override
     public int readSector(byte[] buffer, int sectorNo) throws IOException {
-Debug.printf("readSector: %d, %08x\n", sectorNo, sectorNo * bytesPerSector);
+Debug.printf(Level.FINE, "readSector: %d, %08x\n", sectorNo, sectorNo * bytesPerSector);
         sbc.position(offset + (long) sectorNo * bytesPerSector);
         sbc.read(ByteBuffer.wrap(buffer));
         return bytesPerSector;
