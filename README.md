@@ -27,3 +27,7 @@
  * https://github.com/barbeque/pc98-disk-tools
  * https://www.pc98.org/main.html
  * http://elm-chan.org/docs/fat.html
+
+## TODO
+
+ * file entry related class tree is not good
