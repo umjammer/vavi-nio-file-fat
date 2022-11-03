@@ -12,12 +12,12 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import vavix.io.WinRawIO;
-import vavix.io.fat.DosFileEntry;
+import vavix.io.fat.DeletedEntry;
+import vavix.io.fat.DeletedEntryImpl;
+import vavix.io.fat.DirectoryEntry;
 import vavix.io.fat.FileAllocationTable;
-import vavix.io.fat.FileAllocationTable.DeletedFileEntry;
 import vavix.io.fat.FileEntry;
 
 
@@ -40,7 +40,7 @@ public class fat32_6 {
     FileAllocationTable fat32;
 
     /** */
-    Comparator<DeletedFileEntry> createdAndNameComparator = (o1, o2) -> {
+    Comparator<DeletedEntry> createdAndNameComparator = (o1, o2) -> {
         if (o1.created() - o2.created() != 0) {
             return (int) (o1.created() / 1000 - o2.created() / 1000);
         } else {
@@ -49,13 +49,13 @@ public class fat32_6 {
     };
 
     /** */
-    Comparator<DeletedFileEntry> createdComparator = (o1, o2) -> (int) (o1.created() / 1000 - o2.created() / 1000);
+    Comparator<DeletedEntryImpl> createdComparator = (o1, o2) -> (int) (o1.created() / 1000 - o2.created() / 1000);
 
     /** */
-    Comparator<DeletedFileEntry> lastModifiedComparator = (o1, o2) -> (int) (o1.lastModified() / 1000 - o2.lastModified() / 1000);
+    Comparator<DeletedEntryImpl> lastModifiedComparator = (o1, o2) -> (int) (o1.lastModified() / 1000 - o2.lastModified() / 1000);
 
     /** */
-    Comparator<DeletedFileEntry> lastAccessedComparator = (o1, o2) -> (int) (o1.lastAccessed() / (1000 * 60 * 60 * 24) - o2.lastAccessed() / (1000 * 60 * 60 * 24));
+    Comparator<DeletedEntryImpl> lastAccessedComparator = (o1, o2) -> (int) (o1.lastAccessed() / (1000 * 60 * 60 * 24) - o2.lastAccessed() / (1000 * 60 * 60 * 24));
 
     /** */
 //    FindingStrategy continuousClustersFindingStrategy = new FindingStrategy() {
@@ -89,7 +89,7 @@ public class fat32_6 {
         this.fat32 = new FileAllocationTable(new WinRawIO(deviceName));
 
         File cache = new File("deletedEntries.cache");
-        List<FileAllocationTable.DeletedFileEntry> deletedEntries;
+        List<DeletedEntry> deletedEntries;
         if (!cache.exists()) {
             String path = deviceName;
             deletedEntries = new ArrayList<>();
@@ -106,7 +106,7 @@ public class fat32_6 {
         }
 
         deletedEntries.sort(createdAndNameComparator);
-        for (DeletedFileEntry entry : deletedEntries) {
+        for (DeletedEntry entry : deletedEntries) {
 System.err.printf("%tF, %tF, %tF: %s, %d\n", entry.lastAccessed(), entry.lastModified(), entry.created(), entry.getName(), entry.getStartCluster());
         }
 
@@ -115,11 +115,11 @@ System.err.printf("%tF, %tF, %tF: %s, %d\n", entry.lastAccessed(), entry.lastMod
     }
 
     /** */
-    void dig(String path, List<FileAllocationTable.DeletedFileEntry> deletedEntries) throws IOException {
+    void dig(String path, List<DeletedEntry> deletedEntries) throws IOException {
 System.err.println("DIR: " + path);
-        Map<String, FileEntry> entries = fat32.getEntries(path);
-        for (FileEntry entry : entries.values()) {
-            if (entry instanceof DosFileEntry && !(entry instanceof DeletedFileEntry)) {
+        DirectoryEntry directory = fat32.getDirectoryEntry(path);
+        for (FileEntry entry : directory.entries()) {
+            if (!(entry instanceof DeletedEntry)) {
                 if (entry.isDirectory()) {
                     if (!entry.getName().equals(".") && !entry.getName().equals("..")) {
                         try {
@@ -129,9 +129,9 @@ System.err.println("DIR: " + path);
                         }
                     }
                 }
-            } else if (entry instanceof FileAllocationTable.DeletedFileEntry) {
-//System.err.printf("%s\\%s: %tF\n", path, entry.getName(), ((DeletedFileEntry) entry).lastAccessed());
-                deletedEntries.add((FileAllocationTable.DeletedFileEntry) entry);
+            } else {
+//System.err.printf("%s\\%s: %tF\n", path, entry.getName(), ((DeletedEntryImpl) entry).lastAccessed());
+                deletedEntries.add((DeletedEntry) entry);
             }
         }
     }

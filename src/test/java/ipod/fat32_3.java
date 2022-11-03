@@ -8,11 +8,11 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.Scanner;
 
 import vavi.util.StringUtil;
 import vavix.io.WinRawIO;
+import vavix.io.fat.DirectoryEntry;
 import vavix.io.fat.FileAllocationTable;
 import vavix.io.fat.FileEntry;
 import vavix.util.ByteArrayMatcher;
@@ -86,16 +86,15 @@ System.err.println("found at cluster: " + lastCluster + "\n" + StringUtil.getDum
     static void exec2(String[] args) throws Exception {
         String deviceName = args[0];
         FileAllocationTable fat32 = new FileAllocationTable(new WinRawIO(deviceName));
-        Map<String, FileEntry> entries = fat32.getEntries(args[0]);
+        DirectoryEntry directory = fat32.getDirectoryEntry(args[0]);
 
         byte[] buffer = new byte[fat32.bpb.getBytesPerSector()]; 
         BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(Paths.get(args[1]))));
         while (reader.ready()) {
             String file = reader.readLine();
 System.err.println("file: " + file);
-            if (entries.containsKey(file)) {
-                FileEntry entry = entries.get(file);
-
+            FileEntry entry = directory.find(file);
+            if (entry != null) {
                 for (int i = 0; i < (fat32.bpb.getLastCluster() + 0xffff) / 0x10000; i++) {
                     int startCluster = i * 0x10000 + entry.getStartCluster();
 System.err.print("cluster: " + startCluster);
@@ -127,7 +126,7 @@ System.err.println(", startClusterHigh: " + i + "\n" + StringUtil.getDump(buffer
         String deviceName = args[0];
 //System.err.println(deviceName + ", " + path + ", " + file);
         FileAllocationTable fat32 = new FileAllocationTable(new WinRawIO(deviceName));
-        Map<String, FileEntry> entries = fat32.getEntries(args[0]);
+        DirectoryEntry directory = fat32.getDirectoryEntry(args[0]);
 //for (DirectoryEntry entry : entries.values()) {
 // System.err.println(entry.getName() + ": " + entry.getStartCluster());
 //}
@@ -135,8 +134,8 @@ System.err.println(", startClusterHigh: " + i + "\n" + StringUtil.getDump(buffer
         BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(Paths.get(args[1]))));
         while (reader.ready()) {
             String file = reader.readLine();
-            if (entries.containsKey(file)) {
-                FileEntry entry = entries.get(file);
+            FileEntry entry = directory.find(file);
+            if (entry != null) {
 System.err.println(entry.getName() + "\n" + StringUtil.paramString(entry));
             } else {
 System.err.println("not found: " + file);

@@ -16,7 +16,7 @@ import java.util.Collection;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/02/08 umjammer initial version <br>
  */
-public interface FileEntry extends DirectoryEntry, Comparable<FileEntry> {
+public interface FileEntry {
 
     boolean isDirectory();
 
@@ -30,6 +30,10 @@ public interface FileEntry extends DirectoryEntry, Comparable<FileEntry> {
     long length();
 
     long lastModified();
+
+    long created();
+
+    long lastAccessed();
 }
 
 /* */

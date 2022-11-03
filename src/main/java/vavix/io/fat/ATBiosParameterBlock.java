@@ -8,7 +8,9 @@ package vavix.io.fat;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.logging.Level;
 
+import vavi.util.Debug;
 import vavi.util.serdes.Element;
 import vavi.util.serdes.Serdes;
 
@@ -236,7 +238,7 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
 
     @Override
     public int getStartClusterOfRootDirectory() {
-        return fat32 != null ? fat32.startClusterOfRootDirectory : 0;
+        return type == FatType.Fat32Fat ? fat32.startClusterOfRootDirectory : 0;
     }
 
     @Override
@@ -244,16 +246,22 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
         return bytesPerSector;
     }
 
+    /** using jnode algorithm */
     @Override
     public int toSector(int cluster) {
+        int sector;
         switch (type) {
         case Fat32Fat:
         default:
-            return (cluster - 2) * sectorsPerCluster + firstDataSector;
+            sector = (cluster - 2) * sectorsPerCluster + firstDataSector;
+            break;
         case Fat16Fat:
         case Fat12Fat:
-            return cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
+            sector = cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
+            break;
         }
+Debug.printf(Level.FINE, "cluster: %d -> sector: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d, bytesPerSector: %d", cluster, sector, firstDataSector, rootDirSectors, sectorsPerCluster, bytesPerSector);
+        return sector;
     }
 
     @Override

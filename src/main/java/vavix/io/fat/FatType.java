@@ -36,15 +36,15 @@ public enum FatType implements Fat {
         private static final long serialVersionUID = -8008307331300948383L;
         @Override
         protected int nextCluster(int cluster) throws IOException {
-            int sector = getFatSector() + (cluster * 4) / bpb.getBytesPerSector();
-            if (sector != currentSector) {
-                io.readSector(buffer, sector);
-                currentSector = sector;
+            int fatSector = getFatSector() + (cluster * 4) / bpb.getBytesPerSector();
+            if (fatSector != currentFatSector) {
+                io.readSector(buffer, fatSector);
+                currentFatSector = fatSector;
             }
             int position = (cluster * 4) % bpb.getBytesPerSector();
-Debug.println(Level.FINER, "sector: " + sector + ", position: " + position + "\n" + StringUtil.getDump(buffer, position, 16));
+Debug.println(Level.FINER, "fatSector: " + fatSector + ", position: " + position + "\n" + StringUtil.getDump(buffer, position, 16));
             int nextCluster = ByteUtil.readLeInt(buffer, position);
-Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, next: %4$d%n", cluster, sector, position, nextCluster);
+Debug.printf(Level.FINER, "cluster: %1$d, fatSector: %2$d, position: %3$d, %3$08x, next: %4$d%n", cluster, fatSector, position, nextCluster);
             return nextCluster;
         }
 
@@ -73,14 +73,14 @@ Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
         @Override
         protected int nextCluster(int cluster) throws IOException {
             int sector = getFatSector() + (cluster * 2) / bpb.getBytesPerSector();
-            if (sector != currentSector) {
+            if (sector != currentFatSector) {
                 io.readSector(buffer, sector);
-                currentSector = sector;
+                currentFatSector = sector;
             }
             int position = (cluster * 2) % bpb.getBytesPerSector();
-Debug.println(Level.FINE, "sector: " + sector + ", position: " + position + "\n" + StringUtil.getDump(buffer, position, 8));
+Debug.println(Level.FINER, "sector: " + sector + ", position: " + position + "\n" + StringUtil.getDump(buffer, position, 8));
             int nextCluster = ByteUtil.readLeShort(buffer, position) & 0xffff;
-Debug.printf(Level.FINE, "cluster: %1$d, sector: %2$d, position: %3$d, %3$04x, next: %4$d%n", cluster, sector, position, (nextCluster & 0xfff8) > 0 ? -1 : nextCluster);
+Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$04x, next: %4$d%n", cluster, sector, position, (nextCluster & 0xfff8) > 0 ? -1 : nextCluster);
             return nextCluster;
         }
 
@@ -88,7 +88,7 @@ Debug.printf(Level.FINE, "cluster: %1$d, sector: %2$d, position: %3$d, %3$04x, n
         public Integer[] getClusterChain(int cluster) throws IOException {
             List<Integer> clusters = new ArrayList<>();
             do {
-Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
+Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
             } while (0x0002 <= cluster && cluster <= 0xfff6);
@@ -98,7 +98,7 @@ Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
         @Override
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
-Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
+Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
             return 0x0002 <= cluster && cluster <= 0xffff;
         }
     },
@@ -109,16 +109,16 @@ Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
         @Override
         protected int nextCluster(int cluster) throws IOException {
             int sector = getFatSector() + (cluster + cluster / 2) / bpb.getBytesPerSector();
-            if (sector != currentSector) {
+            if (sector != currentFatSector) {
                 io.readSector(buffer, sector);
-                currentSector = sector;
+                currentFatSector = sector;
             }
             int position = (cluster + cluster / 2) % bpb.getBytesPerSector();
             short temp = 0;
             if (position == buffer.length - 1) { // across 2 sectors
                 byte l = buffer[position];
                 io.readSector(buffer, sector + 1);
-                currentSector = sector + 1;
+                currentFatSector = sector + 1;
                 byte h = buffer[0];
                 temp = (short) (h << 8 | l & 0xff);
             } else {
@@ -178,7 +178,7 @@ Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, 
     protected byte[] buffer = new byte[1024];
 
     /** TODO thread unsafe -> cache */
-    protected int currentSector = -1;
+    protected int currentFatSector = -1;
 
     /**
      * TODO thread unsafe -> cache

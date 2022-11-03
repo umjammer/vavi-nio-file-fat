@@ -7,7 +7,9 @@
 package vavix.io.fat;
 
 import java.util.Arrays;
+import java.util.logging.Level;
 
+import vavi.util.Debug;
 import vavi.util.serdes.Element;
 import vavi.util.serdes.Serdes;
 
@@ -71,7 +73,7 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
     private FatType type;
 
     /** */
-    private int rootDirSectors;
+    public int rootDirSectors;
 
     /**
      * do after injection
@@ -135,7 +137,7 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
 
     @Override
     public int getStartClusterOfRootDirectory() {
-        return (reservedSectors + numberOfFAT * numberOfFATSector) / sectorsPerCluster;
+        return 0;
     }
 
     @Override
@@ -145,7 +147,7 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
 
     @Override
     public int getFatStartSector(int fatNumber) {
-//Debug.printf("reservedSectors: %d, fatNumber: %d, numberOfFATSector: %d, result: %d%n", reservedSectors, fatNumber, numberOfFATSector, reservedSectors + fatNumber * numberOfFATSector);
+Debug.printf(Level.FINER, "reservedSectors: %d, fatNumber: %d, numberOfFATSector: %d, result: %d%n", reservedSectors, fatNumber, numberOfFATSector, reservedSectors + fatNumber * numberOfFATSector);
         return reservedSectors + fatNumber * numberOfFATSector;
     }
 
@@ -154,17 +156,22 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
         return (numberOfLargeSectors + (sectorsPerCluster - 1)) / sectorsPerCluster;
     }
 
+    // TODO same as the AT's
     @Override
     public int toSector(int cluster) {
-//Debug.printf(Level.FINER, "cluster: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d", cluster, firstDataSector, rootDirSectors, sectorsPerCluster);
+        int sector;
         switch (type) {
         case Fat32Fat:
         default:
-            return (cluster - 2) * sectorsPerCluster + firstDataSector;
+            sector = (cluster - 2) * sectorsPerCluster + firstDataSector;
+            break;
         case Fat16Fat:
         case Fat12Fat:
-            return cluster == firstDataSector ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
+            sector = cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
+            break;
         }
+Debug.printf(Level.FINE, "cluster: %d -> sector: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d, bytesPerSector: %d, distinguish root threshold: %d", cluster, sector, firstDataSector, rootDirSectors, sectorsPerCluster, bytesPerSector, rootDirSectors / sectorsPerCluster);
+        return sector;
     }
 
     @Override

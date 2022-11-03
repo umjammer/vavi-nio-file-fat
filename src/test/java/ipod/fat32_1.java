@@ -13,14 +13,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 import vavi.util.StringUtil;
 import vavix.io.WinRawIO;
+import vavix.io.fat.DeletedEntryImpl;
+import vavix.io.fat.DirectoryEntry;
 import vavix.io.fat.Fat;
 import vavix.io.fat.FileAllocationTable;
-import vavix.io.fat.FileAllocationTable.DeletedFileEntry;
 import vavix.io.fat.FileEntry;
 import vavix.util.MatchingStrategy;
 
@@ -47,7 +47,7 @@ public class fat32_1 {
         String outdir = args[1];
 //System.err.println(deviceName + ", " + path + ", " + file);
         this.fat32 = new FileAllocationTable(new WinRawIO(args[0]));
-        Map<String, FileEntry> entries = fat32.getEntries(args[0]);
+        DirectoryEntry directory = fat32.getDirectoryEntry(args[0]);
 //for (DirectoryEntry entry : entries.values()) {
 // System.err.println(entry.getName() + ": " + entry.getStartCluster());
 //}
@@ -59,10 +59,10 @@ public class fat32_1 {
         BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(Paths.get(args[2]))));
         while (reader.ready()) {
             String file = reader.readLine();
-            if (entries.containsKey(file)) {
-                FileEntry entry = entries.get(file);
-                if (entry instanceof DeletedFileEntry) {
-                    exec3((FileAllocationTable.DeletedFileEntry) entry, outdir, file);
+            FileEntry entry = directory.find(file);
+            if (entry != null) {
+                if (entry instanceof DeletedEntryImpl) {
+                    exec3((DeletedEntryImpl) entry, outdir, file);
                 }
             } else {
 System.err.println("file not found: " + file);
@@ -132,7 +132,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
     /**
      * 3: analyze intermittent file ok?
      */
-    void exec3(FileAllocationTable.DeletedFileEntry entry, String outdir, String file) throws Exception {
+    void exec3(DeletedEntryImpl entry, String outdir, String file) throws Exception {
 
         int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
         byte[] buffer = new byte[bytesPerCluster]; 
@@ -140,7 +140,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
         //
         // startClusterHigh を見つける
         //
-        if (!entry.resolveStartCluster(id3v2MatchingStrategy) || !entry.isStartClusterValid()) {
+        if (!fat32.resolveStartCluster(entry, id3v2MatchingStrategy) || !entry.isStartClusterValid()) {
 System.err.println("start cluster not found: " + file);
             return;
         }
@@ -188,14 +188,14 @@ System.err.println();
     /**
      * 2: salvage intermittent file ok?
      */
-    void exec2(DeletedFileEntry entry, String outdir, String file) throws Exception {
+    void exec2(DeletedEntryImpl entry, String outdir, String file) throws Exception {
 
         byte[] buffer = new byte[fat32.bpb.getBytesPerSector()];
 
         //
         // find startClusterHigh
         //
-        if (!entry.resolveStartCluster(id3v2MatchingStrategy) || !entry.isStartClusterValid()) {
+        if (!fat32.resolveStartCluster(entry, id3v2MatchingStrategy) || !entry.isStartClusterValid()) {
 System.err.println("start cluster not found: " + file);
             return;
         }
@@ -259,7 +259,7 @@ System.err.println(" salvaged, finish: " + (entry.length() - rest) + "/" + entry
     /**
      * 1: salvage continued file only
      */
-    void exec1(DeletedFileEntry entry, String outdir, String file) throws Exception {
+    void exec1(DeletedEntryImpl entry, String outdir, String file) throws Exception {
 
         byte[] buffer = new byte[fat32.bpb.getBytesPerSector()];
 
@@ -269,7 +269,7 @@ System.err.println(" salvaged, finish: " + (entry.length() - rest) + "/" + entry
         // search startClusterHigh
         //
 
-        if (!entry.resolveStartCluster(id3v2MatchingStrategy) || !entry.isStartClusterValid()) {
+        if (!fat32.resolveStartCluster(entry, id3v2MatchingStrategy) || !entry.isStartClusterValid()) {
 System.err.println("start cluster not found: " + file);
             return;
         }
