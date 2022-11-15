@@ -6,6 +6,9 @@
 
 # vavi-nio-file-fat
 
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/File_Allocation_Table_Logo.svg/410px-File_Allocation_Table_Logo.svg.png" width="100" alt="fat icon"/>
+<sub><a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY SA 3.0</a></sub>
+
 🌏 mount the old school world!
 
 ## Status
