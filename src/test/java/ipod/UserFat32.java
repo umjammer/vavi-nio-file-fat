@@ -1,8 +1,10 @@
-package ipod;/*
+/*
  * Copyright (c) 2022 by Naohide Sano, All rights reserved.
  *
  * Programmed by Naohide Sano
  */
+
+package ipod;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,8 +1,10 @@
-package ipod;/*
+/*
  * Copyright (c) 2006 by Naohide Sano, All rights reserved.
  *
  * Programmed by Naohide Sano
  */
+
+package ipod;
 
 import java.io.File;
 import java.io.IOException;
