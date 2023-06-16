@@ -1,4 +1,4 @@
-# fat32_1 ~ 6
+# ipod package
 
 those classes were used to salvage mp3 files in the ipod classic those i accidentally deleted all.
 afa i remember, i salvaged 100% files and 99% of data. lest 1% is there were some uncertain part around

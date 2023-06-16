@@ -124,9 +124,10 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
 
     // TODO
     public boolean validate() {
-        if (!oemLabel.startsWith("NEC")) {
-            return false;
-        }
+//        if (!oemLabel.startsWith("NEC")) {
+//            return false;
+//        }
+Debug.println(Level.FINE, "oemLabel: " + oemLabel);
         return true;
     }
 

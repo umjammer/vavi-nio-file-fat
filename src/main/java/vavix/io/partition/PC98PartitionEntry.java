@@ -7,7 +7,9 @@
 package vavix.io.partition;
 
 import java.util.Arrays;
+import java.util.logging.Level;
 
+import vavi.util.Debug;
 import vavi.util.serdes.Element;
 import vavi.util.serdes.Serdes;
 
@@ -118,9 +120,11 @@ public class PC98PartitionEntry {
         if ((mid & 0xf0) == 0 || (sid & 0xf0) == 0) {
             return false;
         }
-        if (!new String(name).startsWith("MS-DOS")) {
-            return false;
-        }
+        String string = new String(name).trim();
+//        if (!Arrays.asList("MS-DOS", "Windows 95").contains(string)) {
+//            return false;
+//        }
+Debug.println(Level.FINE, "name: " + string);
         return true;
     }
 }
