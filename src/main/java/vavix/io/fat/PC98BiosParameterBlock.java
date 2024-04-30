@@ -61,7 +61,7 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
     @Element(sequence = 17, value = "11")
     public String volumeLabel;
     @Element(sequence = 18, value = "8")
-    String fileSystem;
+    public String fileSystem;
 
     /** */
     public int firstDataSector;

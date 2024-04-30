@@ -124,7 +124,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
 
     /** */
     MatchingStrategy<byte[], ?> id3v2MatchingStrategy = new MatchingStrategy<byte[], Object>() {
-        public int indexOf(byte[] pattern, Object dummy) {
+        @Override public int indexOf(byte[] pattern, Object dummy) {
             return pattern[0] == 'I' && pattern[1] == 'D' && pattern[2] == '3' ? 0 : -1;
         }
     };
