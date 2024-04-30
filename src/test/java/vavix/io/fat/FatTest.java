@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -99,7 +98,7 @@ Debug.println(fat.fat);
     /** */
     void list(FileAllocationTable fat, String path) throws IOException {
         DirectoryEntry directory = fat.getDirectoryEntry(path);
-        for (FileEntry entry : directory.entries().stream().filter(e -> !(e instanceof DeletedEntry)).collect(Collectors.toList())) {
+        for (FileEntry entry : directory.entries().stream().filter(e -> !(e instanceof DeletedEntry)).toList()) {
             if (!entry.isDirectory()) {
 System.err.println(path + entry + ", start: " + entry.getStartCluster() + (Debug.isLoggable(Level.INFO) ? "\n" + StringUtil.getDump(fat.getInputStream(entry), 0, 64) : ""));
             } else {
