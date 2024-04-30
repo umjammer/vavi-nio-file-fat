@@ -1,13 +1,12 @@
 [![](https://jitpack.io/v/umjammer/vavi-nio-file-fat.svg)](https://jitpack.io/#umjammer/vavi-nio-file-fat)
-[![Java CI with Maven](https://github.com/umjammer/vavi-nio-file-fat/actions/workflows/maven.yml/badge.svg)](https://github.com/umjammer/vavi-nio-file-fat/actions)
+[![Java CI](https://github.com/umjammer/vavi-nio-file-fat/actions/workflows/maven.yml/badge.svg)](https://github.com/umjammer/vavi-nio-file-fat/actions/workflows/maven.yml)
 [![CodeQL](https://github.com/umjammer/vavi-nio-file-fat/actions/workflows/codeql.yml/badge.svg)](https://github.com/umjammer/vavi-nio-file-fat/actions/workflows/codeql.yml)
-![Java](https://img.shields.io/badge/Java-8-b07219)
+![Java](https://img.shields.io/badge/Java-17-b07219)
 [![Parent](https://img.shields.io/badge/Parent-vavi--apps--fuse-pink)](https://github.com/umjammer/vavi-apps-fuse)
 
 # vavi-nio-file-fat
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/File_Allocation_Table_Logo.svg/410px-File_Allocation_Table_Logo.svg.png" width="100" alt="fat icon"/>
-<sub><a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY SA 3.0</a></sub>
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Fat32_structure.svg/837px-Fat32_structure.svg.png" width="220" alt="fat icon"/><sub><a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY SA 3.0</a></sub>
 
 🌏 mount the old school world!
 

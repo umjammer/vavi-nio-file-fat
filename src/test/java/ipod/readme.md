@@ -1,6 +1,6 @@
 # ipod package
 
-those classes were used to salvage mp3 files in the ipod classic those i accidentally deleted all.
+those classes were used for salvaging mp3 files in the ipod classic those i accidentally deleted all.
 afa i remember, i salvaged 100% files and 99% of data. lest 1% is there were some uncertain part around
 mp3 trailer sectors. but listening those, i couldn't find cracked part.
 
