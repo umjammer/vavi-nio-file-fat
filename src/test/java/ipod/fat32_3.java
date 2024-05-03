@@ -28,8 +28,8 @@ import vavix.util.Matcher;
  * @version 0.00 2006/01/09 nsano initial version <br>
  */
 public class fat32_3 {
-    /**
-     */
+
+    /** */
     public static void main(String[] args) throws Exception {
         exec2(args);
     }
@@ -79,7 +79,7 @@ System.err.println("found at cluster: " + lastCluster + "\n" + StringUtil.getDum
         }
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
      * 2: find firstClusterHigh by id3v2
@@ -118,7 +118,7 @@ System.err.println(", startClusterHigh: " + i + "\n" + StringUtil.getDump(buffer
         reader.close();
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
      * 1: check just existance.

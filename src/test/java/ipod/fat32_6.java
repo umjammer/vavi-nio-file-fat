@@ -30,6 +30,7 @@ import vavix.io.fat.FileEntry;
  * @version 0.00 2006/01/13 nsano initial version <br>
  */
 public class fat32_6 {
+
     /**
      * search word in cluster
      * @param args 0:device

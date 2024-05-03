@@ -42,7 +42,7 @@ public class fat32_1 {
         new fat32_1(args);
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /** */
     private fat32_1(String[] args) throws Exception {
@@ -120,12 +120,12 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
         scanner.close();
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /** */
     MatchingStrategy<byte[], ?> id3v2MatchingStrategy = (MatchingStrategy<byte[], Object>) (pattern, dummy) -> pattern[0] == 'I' && pattern[1] == 'D' && pattern[2] == '3' ? 0 : -1;
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
      * 3: analyze intermittent file ok?
@@ -136,7 +136,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
         byte[] buffer = new byte[bytesPerCluster]; 
 
         //
-        // startClusterHigh を見つける
+        // find startClusterHigh
         //
         if (!fat32.resolveStartCluster(entry, id3v2MatchingStrategy) || !entry.isStartClusterValid()) {
 System.err.println("start cluster not found: " + file);
@@ -145,8 +145,8 @@ System.err.println("start cluster not found: " + file);
         int startCluster = entry.getStartCluster();
 
         //
-        // 連続しているクラスターを書き出す
-        // 途切れたら次の使われていないところ
+        // export consecutive clusters
+        // if it stops, move on to the next unused area
         //
 
 System.err.println(entry.getName() + ": " + entry.getStartCluster() + ", " + entry.length());
@@ -158,7 +158,7 @@ System.err.println(entry.getName() + ": " + entry.getStartCluster() + ", " + ent
             int targetCluster = startCluster + cluster;
 System.err.print("cluster: " + targetCluster);
 
-            // 途切れたら次の使われていないところ
+            // if it stops, move on to the next unused area
 
             if (fat32.isUsing(targetCluster)) {
 System.err.println(" has used, skip");
@@ -178,10 +178,9 @@ if (block > 1) {
 
 System.err.println();
         }
-
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
      * 2: salvage intermittent file ok?
@@ -252,7 +251,7 @@ System.err.println(" salvaged, finish: " + (entry.length() - rest) + "/" + entry
         output.setLastModified(entry.lastModified());
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
      * 1: salvage continued file only

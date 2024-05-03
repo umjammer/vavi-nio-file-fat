@@ -27,7 +27,7 @@ public class fat32_2 {
         exec1(args);
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
      * 2: find clusters ID3v1 tag exsists
@@ -52,10 +52,10 @@ public class fat32_2 {
         }
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
-     * 1: find clusters ID3v2 tag exsists
+     * 1: find clusters ID3v2 tag exists
      * @param args 0:device
      */
     static void exec1(String[] args) throws Exception {

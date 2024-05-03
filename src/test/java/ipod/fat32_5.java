@@ -24,8 +24,9 @@ import vavix.util.Matcher;
  * @version 0.00 2006/01/09 nsano initial version <br>
  */
 public class fat32_5 {
+
     /**
-     * serach word in cluster 
+     * search word in cluster
      * @param args 0:device, 1:cluster list, 2:word
      */
     public static void main(String[] args) throws Exception {

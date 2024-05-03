@@ -35,7 +35,7 @@ public class fat32_4 {
         new fat32_4(args);
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /** */
     private fat32_4(String[] args) throws Exception {
@@ -87,7 +87,7 @@ System.err.println("startCluster: " + startCluster + ", size: " + size + ", last
         scanner.close();
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
      * 3: analyze 2nd clusters
@@ -143,7 +143,7 @@ System.err.println("cluster: " + i + ": " + c + "\n" + StringUtil.getDump(buffer
         scanner.close();
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
      * 4: find 2nd clusters from last cluster (continued, clusters not specified), and salvage
@@ -219,7 +219,7 @@ System.err.println(" 2nd parts salvaged, finish: " + ((clusterList.size() - 1) *
         scanner.close();
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
      * 3: find 2nd clusters from last cluster (uncontinued clusters ok?), and salvage, sure id3v1
@@ -312,7 +312,7 @@ System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + lastCluster
         scanner.close();
     }
 
-    //-------------------------------------------------------------------------
+    // ----
 
     /**
      * 2: find 2nd clusters from last cluster (uncontinued clusters ok?), and salvage
