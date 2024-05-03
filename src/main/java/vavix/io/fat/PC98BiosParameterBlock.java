@@ -160,18 +160,12 @@ Debug.printf(Level.FINER, "reservedSectors: %d, fatNumber: %d, numberOfFATSector
     // TODO same as the AT's
     @Override
     public int toSector(int cluster) {
-        int sector;
-        switch (type) {
-        case Fat32Fat:
-        default:
-            sector = (cluster - 2) * sectorsPerCluster + firstDataSector;
-            break;
-        case Fat16Fat:
-        case Fat12Fat:
-            sector = cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
-            break;
-        }
-Debug.printf(Level.FINE, "cluster: %d -> sector: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d, bytesPerSector: %d, distinguish root threshold: %d", cluster, sector, firstDataSector, rootDirSectors, sectorsPerCluster, bytesPerSector, rootDirSectors / sectorsPerCluster);
+        int sector = switch (type) {
+            default -> (cluster - 2) * sectorsPerCluster + firstDataSector;
+            case Fat16Fat, Fat12Fat ->
+                    cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
+        };
+        Debug.printf(Level.FINE, "cluster: %d -> sector: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d, bytesPerSector: %d, distinguish root threshold: %d", cluster, sector, firstDataSector, rootDirSectors, sectorsPerCluster, bytesPerSector, rootDirSectors / sectorsPerCluster);
         return sector;
     }
 

@@ -28,7 +28,7 @@ public class BasicRawIO implements IOSource {
     private int bytesPerSector = 512;
     private long offset;
 
-    private SeekableByteChannel sbc;
+    private final SeekableByteChannel sbc;
 
     /** */
     public BasicRawIO(String deviceName) throws IOException {

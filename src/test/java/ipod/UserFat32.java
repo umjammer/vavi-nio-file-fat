@@ -7,6 +7,7 @@
 package ipod;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,12 +15,20 @@ import vavix.io.fat.BiosParameterBlock;
 import vavix.io.fat.Fat;
 
 
-/** */
+/**
+ * UserFat32.
+ *
+ * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
+ * @version 0.00 2022/02/07 nsano initial version <br>
+ */
 public class UserFat32 implements Fat {
-    /** */
+
+    @Serial
     private static final long serialVersionUID = -6771019237363727447L;
+
     /** */
     int[] clusters;
+
     /** */
     public UserFat32(BiosParameterBlock bpb, Fat fat) throws IOException {
         int size = bpb.getLastCluster();
@@ -28,6 +37,7 @@ public class UserFat32 implements Fat {
             clusters[i] = fat.getClusterValue(i);
         }
     }
+
     @Override
     public Integer[] getClusterChain(int cluster) throws IOException {
         List<Integer> clusters = new ArrayList<>();
@@ -37,19 +47,23 @@ public class UserFat32 implements Fat {
         } while (0x0000_0002 <= cluster && cluster <= 0x0fff_fff6);
         return clusters.toArray(new Integer[0]);
     }
+
     @Override
     public boolean isUsing(int cluster) throws IOException {
         int value = getClusterValue(cluster);
         return 0x0000_0002 <= value && value <= 0x0fff_ffff;
     }
+
     @Override
     public void setClusterValue(int cluster, int value) throws IOException {
         clusters[cluster] = value;
     }
+
     @Override
     public int getClusterValue(int cluster) throws IOException {
         return clusters[cluster];
     }
+
     @Override
     public void setClusterChain(Integer[] clusters) throws IOException {
         for (int i = 0; i < clusters.length; i++) {

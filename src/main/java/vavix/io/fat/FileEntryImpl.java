@@ -8,6 +8,7 @@ package vavix.io.fat;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.time.Instant;
@@ -32,11 +33,11 @@ import vavi.util.win32.DateUtil;
  */
 public class FileEntryImpl implements FileEntry, Serializable, Comparable<FileEntry>{
 
-    /** */
+    @Serial
     private static final long serialVersionUID = 1003655836319404523L;
 
     /** file name encoding */
-    private static String encoding;
+    private static final String encoding;
 
     static {
         encoding = System.getProperty("vavix.io.fat.FileEntry.encoding", "ISO_8859_1");
@@ -71,7 +72,7 @@ Debug.println(Level.FINE, "encoding: " + encoding);
         leis.readFully(b1);
         filename = getPrefixString() + new String(b1, getPrefixString().length(), 8 - getPrefixString().length(), Charset.forName(encoding)).trim();
         String extension = new String(b1, 8, 3, Charset.forName(encoding)).trim();
-        filename += extension.length() > 0 ? '.' + extension : "";
+        filename += !extension.isEmpty() ? '.' + extension : "";
 //Debug.println("filename: [" + filename + "], [" + extension + "]: " + extension.length());
         attribute = leis.readUnsignedByte();
         capitalFlag = leis.readUnsignedByte();
@@ -138,12 +139,12 @@ Debug.println(Level.FINE, "longName: " + longName + ", " + longNames.size() + ",
         return lastModified.getTime();
     }
 
-    /** */
+    @Override
     public long lastAccessed() {
         return lastAccessed.getTime();
     }
 
-    /** */
+    @Override
     public long created() {
         return created.getTime();
     }

@@ -180,10 +180,10 @@ System.err.println("\nnot continued, stop");
                     }
                 }
             }
-System.err.println("createing " + String.valueOf(lastCluster) + ".dat");
+System.err.println("createing " + lastCluster + ".dat");
 
 //if (false) {
-            output = new File(dir, String.valueOf(lastCluster) + ".dat");
+            output = new File(dir, lastCluster + ".dat");
             OutputStream os = Files.newOutputStream(output.toPath());
 outer:
             for (int cluster : clusterList) {
@@ -213,7 +213,7 @@ System.err.println(" 2nd parts salvaged");
 System.err.println(" 2nd parts salvaged, finish: " + ((clusterList.size() - 1) * bytesPerCluster + (size % bytesPerCluster)) + " / " + size);
             os.flush();
             os.close();
-            output.renameTo(new File(dir, String.valueOf(lastCluster) + ".incomplete"));
+            output.renameTo(new File(dir, lastCluster + ".incomplete"));
 //}
         }
         scanner.close();
@@ -258,7 +258,7 @@ System.err.println();
 
 if (false) {
             int bytesPerCluster = fat32.bpb.getSectorsPerCluster() * fat32.bpb.getBytesPerSector();
-            output = new File(dir, String.valueOf(lastCluster) + ".dat");
+            output = new File(dir, lastCluster + ".dat");
             OutputStream os = Files.newOutputStream(output.toPath());
             int rest = size;
             byte[] buffer = new byte[bytesPerCluster];
@@ -305,7 +305,7 @@ System.err.println(" 2nd parts salvaged: " + (size - rest) + " / " + size + "\n"
                 output.renameTo(new File(dir, lastCluster + ".incomplete"));
             } else {
 System.err.println(" 2nd parts salvaged, finish: " + (size - rest) + " / " + size);
-System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valueOf(lastCluster) + ".dat > " + dir + "/$1");
+System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + lastCluster + ".dat > " + dir + "/$1");
             }
 }
         }
@@ -354,7 +354,7 @@ System.err.println("lastCluster: " + lastCluster + ", clusters: " + clusters + "
 System.err.println();
 
 //if (false) {
-            output = new File(dir, String.valueOf(lastCluster) + ".dat");
+            output = new File(dir, lastCluster + ".dat");
             OutputStream os = Files.newOutputStream(output.toPath());
             int rest = size;
 outer:
@@ -381,7 +381,7 @@ System.err.println(" 2nd parts salvaged: " + (size - rest) + " / " + size);
                 output.renameTo(new File(dir, lastCluster + ".incomplete"));
             } else {
 System.err.println(" 2nd parts salvaged, finish: " + (size - rest) + " / " + size);
-System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valueOf(lastCluster) + ".dat > " + dir + "/$1");
+System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + lastCluster + ".dat > " + dir + "/$1");
             }
 //}
         }
@@ -447,7 +447,7 @@ System.err.println(" 2nd parts salvaged: " + (size - rest) + " / " + size);
                 output.renameTo(new File(dir, lastCluster + ".incomplete"));
             } else {
 System.err.println(" 2nd parts salvaged, finish: " + (size - rest) + " / " + size);
-System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valueOf(lastCluster) + ".dat > " + dir + "/$1");
+System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + lastCluster + ".dat > " + dir + "/$1");
             }
 //}
         }

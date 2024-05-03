@@ -96,7 +96,7 @@ Debug.println(fat.fat);
     }
 
     /** */
-    void list(FileAllocationTable fat, String path) throws IOException {
+    static void list(FileAllocationTable fat, String path) throws IOException {
         DirectoryEntry directory = fat.getDirectoryEntry(path);
         for (FileEntry entry : directory.entries().stream().filter(e -> !(e instanceof DeletedEntry)).toList()) {
             if (!entry.isDirectory()) {

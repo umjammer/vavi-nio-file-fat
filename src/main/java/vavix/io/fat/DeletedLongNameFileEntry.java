@@ -8,6 +8,8 @@ package vavix.io.fat;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 
 
@@ -17,9 +19,9 @@ import java.util.Collection;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (nsano)
  * @version 0.00 2022/10/29 nsano initial version <br>
  */
-class DeletedLongNameFileEntry extends LongNameFileEntry implements DeletedEntry {
+class DeletedLongNameFileEntry extends LongNameFileEntry implements DeletedEntry, Serializable {
 
-    /** */
+    @Serial
     private static final long serialVersionUID = -3509895194089903860L;
 
     DeletedLongNameFileEntry(DataInput is) throws IOException {

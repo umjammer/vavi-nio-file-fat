@@ -8,6 +8,8 @@ package vavix.io.fat;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 
@@ -30,9 +32,9 @@ import vavi.util.Debug;
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/02/07 umjammer initial version <br>
  */
-class LongNameFileEntry implements Comparable<LongNameFileEntry> {
+class LongNameFileEntry implements Comparable<LongNameFileEntry>, Serializable {
 
-    /** */
+    @Serial
     private static final long serialVersionUID = 1640728749170150017L;
 
     /** */

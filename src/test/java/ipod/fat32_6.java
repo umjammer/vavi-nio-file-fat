@@ -59,7 +59,7 @@ public class fat32_6 {
     /** */
     Comparator<DeletedEntryImpl> lastAccessedComparator = (o1, o2) -> (int) (o1.lastAccessed() / (1000 * 60 * 60 * 24) - o2.lastAccessed() / (1000 * 60 * 60 * 24));
 
-    /** */
+//    /** */
 //    FindingStrategy continuousClustersFindingStrategy = new FindingStrategy() {
 //        public List<Integer> getClusterList(int startCluster) {
 //            List<Integer> clusters;

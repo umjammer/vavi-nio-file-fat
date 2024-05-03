@@ -8,6 +8,7 @@ package vavix.io.fat;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serial;
 
 
 /**
@@ -19,13 +20,13 @@ import java.io.IOException;
  */
 public class DeletedEntryImpl extends FileEntryImpl implements DeletedEntry {
 
-    /** */
+    @Serial
     private static final long serialVersionUID = -8752690030998809470L;
 
     /** */
     private boolean startClusterValid = false;
 
-    /** */
+    @Override
     protected String getPrefixString() {
         return "_";
     }
@@ -35,7 +36,7 @@ public class DeletedEntryImpl extends FileEntryImpl implements DeletedEntry {
         super(is);
     }
 
-    /** */
+    @Override
     public boolean isStartClusterValid() {
         return startClusterValid;
     }

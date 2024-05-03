@@ -7,6 +7,9 @@
 package vavix.util;
 
 
+import java.util.Arrays;
+
+
 /**
  * ByteArrayMatcher.
  *
@@ -15,21 +18,20 @@ package vavix.util;
  */
 public class ByteArrayMatcher implements Matcher<byte[]> {
 
-    private byte[] source;
+    private final byte[] source;
 
     public ByteArrayMatcher(byte[] buffer) {
         this.source = buffer;
     }
 
     /** Boyer-Moore Algorithm */
+    @Override
     public int indexOf(byte[] pattern, int fromIndex) {
         int[] skipTable = new int[256];
         if (fromIndex >= source.length) {
             return -1;
         }
-        for (int ch = 0; ch < skipTable.length; ch++) {
-            skipTable[ch] = pattern.length;
-        }
+        Arrays.fill(skipTable, pattern.length);
         for (int ch = 0; ch < (pattern.length - 1); ch++) {
             skipTable[pattern[ch] & 0xff] = pattern.length - 1 - ch;
         }

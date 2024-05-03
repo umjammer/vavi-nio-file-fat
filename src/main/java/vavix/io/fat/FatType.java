@@ -7,6 +7,7 @@
 package vavix.io.fat;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -25,6 +26,7 @@ import vavix.io.IOSource;
  * @version 0.00 2022/02/07 umjammer initial version <br>
  */
 public enum FatType implements Fat {
+
     /**
      * <li>0000_0000h               unused cluster
      * <li>0000_0002h ~ 0fff_fff6h  next cluster for a file
@@ -32,7 +34,7 @@ public enum FatType implements Fat {
      * <li>0fff_fff8h ~ 0fff_ffffh  last cluster for a file (used 0fff_ffffh normally)
      */
     Fat32Fat(32) {
-        /** */
+        @Serial
         private static final long serialVersionUID = -8008307331300948383L;
         @Override
         protected int nextCluster(int cluster) throws IOException {
@@ -67,7 +69,7 @@ Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
         }
     },
     Fat16Fat(16) {
-        /** */
+        @Serial
         private static final long serialVersionUID = 1846975683407080677L;
 
         @Override
@@ -103,7 +105,7 @@ Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
         }
     },
     Fat12Fat(12) {
-        /** */
+        @Serial
         private static final long serialVersionUID = -3706950356198032944L;
 
         @Override
@@ -186,17 +188,18 @@ Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, 
      */
     protected abstract int nextCluster(int cluster) throws IOException;
 
-    /** */
+    @Override
     public void setClusterValue(int cluster, int value) throws IOException {
         throw new UnsupportedOperationException("read only, use #useUserFat()");
     }
 
     /** TODO thread unsafe */
+    @Override
     public int getClusterValue(int cluster) throws IOException {
         return nextCluster(cluster);
     }
 
-    /** */
+    @Override
     public void setClusterChain(Integer[] clusters) throws IOException {
         throw new UnsupportedOperationException("read only, use #useUserFat()");
     }

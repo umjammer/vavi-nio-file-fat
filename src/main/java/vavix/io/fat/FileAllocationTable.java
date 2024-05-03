@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ import vavix.util.StrategyPatternMatcher;
  */
 public class FileAllocationTable implements Serializable {
 
-    /** */
+    @Serial
     private static final long serialVersionUID = -3299419883884944569L;
 
     /** */
@@ -154,7 +155,7 @@ public class FileAllocationTable implements Serializable {
     }
 
     /** &gt;path, directory&lt; */
-    private static Map<String, DirectoryEntry> entriesMap = new HashMap<>();
+    private static final Map<String, DirectoryEntry> entriesMap = new HashMap<>();
 
     /**
      * The entry point.
@@ -178,7 +179,7 @@ Debug.println(Level.FINEST, "**** directory: \\ (" + bpb.getStartClusterOfRootDi
                 entriesMap.put("", directory);
             }
         }
-        if (path.equals("")) {
+        if (path.isEmpty()) {
 Debug.println(Level.FINEST, "<<<<<<<<<<<: \\: " + directory.entries());
             return directory;
         }
@@ -231,7 +232,7 @@ if (clusters.length > 2) {
                         } else {
                             DeletedEntry fileEntry = new DeletedEntryImpl(ledi);
 //Debug.println(Level.FINEST, StringUtil.paramString(fileEntry));
-                            if (deletedLongNames.size() != 0) {
+                            if (!deletedLongNames.isEmpty()) {
                                 fileEntry.setLongName(deletedLongNames);
                                 deletedLongNames.clear();
                             }
@@ -252,7 +253,7 @@ if (clusters.length > 2) {
                         } else {
                             FileEntry fileEntry = new FileEntryImpl(ledi);
 //Debug.println(Level.FINEST, StringUtil.paramString(fileEntry));
-                            if (temporaryLongNames.size() != 0) {
+                            if (!temporaryLongNames.isEmpty()) {
                                 fileEntry.setLongName(temporaryLongNames);
                                 temporaryLongNames.clear();
                             }
