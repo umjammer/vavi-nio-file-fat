@@ -17,5 +17,3 @@ public interface Matcher<T> {
 
     int indexOf(T pattern, int fromIndex);
 }
-
-/* */

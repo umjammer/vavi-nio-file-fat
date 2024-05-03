@@ -17,5 +17,3 @@ public interface MatchingStrategy<S, P> {
 
     int indexOf(S source, P pattern);
 }
-
-/* */

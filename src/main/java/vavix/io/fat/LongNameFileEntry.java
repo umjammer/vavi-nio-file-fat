@@ -88,5 +88,3 @@ Debug.println(Level.FINE, "subEntryNo: " + subEntryNo + ", " + isLast + ", " + f
         return sum;
     }
 }
-
-/* */

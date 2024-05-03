@@ -35,5 +35,3 @@ public interface FileEntry {
 
     long lastAccessed();
 }
-
-/* */

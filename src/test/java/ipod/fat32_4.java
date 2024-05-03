@@ -454,5 +454,3 @@ System.err.println("cat -B " + dir + "/$1.incomplete " + dir + "/" + String.valu
         scanner.close();
     }
 }
-
-/* */

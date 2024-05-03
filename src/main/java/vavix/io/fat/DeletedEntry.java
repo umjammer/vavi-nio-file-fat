@@ -17,5 +17,3 @@ public interface DeletedEntry extends FileEntry {
     /** */
     boolean isStartClusterValid();
 }
-
-/* */

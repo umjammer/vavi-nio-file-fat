@@ -61,5 +61,3 @@ Debug.printf(Level.FINE, "readSector: %d, %08x\n", sectorNo, sectorNo * bytesPer
         this.offset = offset;
     }
 }
-
-/* */

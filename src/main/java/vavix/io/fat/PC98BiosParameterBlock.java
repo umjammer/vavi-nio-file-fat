@@ -192,5 +192,3 @@ Debug.printf(Level.FINE, "cluster: %d -> sector: %d, firstDataSector: %d, rootDi
         return type;
     }
 }
-
-/* */

@@ -150,5 +150,3 @@ JNIEXPORT void JNICALL Java_vavix_io_RawIO_close(JNIEnv *env, jobject obj) {
         return;
     }
 }
-
-/* */

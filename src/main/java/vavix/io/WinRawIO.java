@@ -77,5 +77,3 @@ public class WinRawIO implements IOSource {
         System.loadLibrary("WinRawIO");
     }
 }
-
-/* */

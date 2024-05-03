@@ -84,5 +84,3 @@ public class ATPartitionEntry {
                         status, startHeader, startCylSec, type, endHeader, endCylSec, startSector, numberOfSectors);
     }
 }
-
-/* */

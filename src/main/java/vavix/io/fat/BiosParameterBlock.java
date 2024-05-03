@@ -32,5 +32,3 @@ public interface BiosParameterBlock {
 
     FatType getFatType();
 }
-
-/* */

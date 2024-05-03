@@ -129,5 +129,3 @@ for (FileEntry entry : directory.entries()) {
 }
     }
 }
-
-/* */

@@ -212,5 +212,3 @@ Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, 
         return fatSize;
     }
 }
-
-/* */

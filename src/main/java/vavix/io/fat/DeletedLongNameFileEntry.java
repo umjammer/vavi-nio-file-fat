@@ -73,5 +73,3 @@ class DeletedLongNameFileEntry extends LongNameFileEntry implements DeletedEntry
         return 0;
     }
 }
-
-/* */

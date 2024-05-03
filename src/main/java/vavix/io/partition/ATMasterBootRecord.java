@@ -30,5 +30,3 @@ public class ATMasterBootRecord {
     @Element(sequence = 3, validation = "new byte[] { 0x55, 0xaa }")
     byte[] bootSignature = new byte[2];
 }
-
-/* */

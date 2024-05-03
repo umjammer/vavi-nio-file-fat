@@ -128,5 +128,3 @@ Debug.println(Level.FINE, "name: " + string);
         return true;
     }
 }
-
-/* */

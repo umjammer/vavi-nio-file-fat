@@ -29,5 +29,3 @@ public interface DirectoryEntry extends FileEntry {
      */
     FileEntry find(String filename);
 }
-
-/* */

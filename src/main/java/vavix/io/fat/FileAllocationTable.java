@@ -317,5 +317,3 @@ Debug.println(Level.FINE, "fat: " + fat);
         return new ByteArrayInputStream(baos.toByteArray());
     }
 }
-
-/* */

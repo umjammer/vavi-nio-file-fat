@@ -25,5 +25,3 @@ public class StrategyPatternMatcher<S, P extends MatchingStrategy<S, ?>> impleme
         return matchingStrategy.indexOf(source, null);
     }
 }
-
-/* */

@@ -49,5 +49,3 @@ public class ByteArrayMatcher implements Matcher<byte[]> {
         return -1;
     }
 }
-
-/* */

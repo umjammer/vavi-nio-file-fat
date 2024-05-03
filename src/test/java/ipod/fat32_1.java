@@ -339,5 +339,3 @@ System.err.println("salvage finished: " + (entry.length() - rest) + "/" + entry.
         }
     }
 }
-
-/* */

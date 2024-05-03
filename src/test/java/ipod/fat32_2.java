@@ -75,5 +75,3 @@ public class fat32_2 {
         }
     }
 }
-
-/* */

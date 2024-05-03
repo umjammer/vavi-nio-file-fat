@@ -60,5 +60,3 @@ System.err.println("not found: " + word);
         }
     }
 }
-
-/* */
