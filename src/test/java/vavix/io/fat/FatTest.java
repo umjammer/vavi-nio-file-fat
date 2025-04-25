@@ -117,7 +117,7 @@ System.err.println(path + entry + ", start: " + entry.getStartCluster());
      */
     public static void main(String[] args) throws Exception {
         FatTest app = new FatTest();
-        PropsEntity.Util.bind(app);
+        app.setup();
         app.t1(args);
     }
 

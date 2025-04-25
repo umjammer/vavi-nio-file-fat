@@ -10,16 +10,18 @@ import java.io.DataInput;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
-import java.util.logging.Level;
 
-import vavi.util.Debug;
 import vavi.util.win32.DateUtil;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -33,6 +35,8 @@ import vavi.util.win32.DateUtil;
  */
 public class FileEntryImpl implements FileEntry, Serializable, Comparable<FileEntry>{
 
+    private static final Logger logger = getLogger(FileEntryImpl.class.getName());
+
     @Serial
     private static final long serialVersionUID = 1003655836319404523L;
 
@@ -41,7 +45,7 @@ public class FileEntryImpl implements FileEntry, Serializable, Comparable<FileEn
 
     static {
         encoding = System.getProperty("vavix.io.fat.FileEntry.encoding", "ISO_8859_1");
-Debug.println(Level.FINE, "encoding: " + encoding);
+logger.log(Level.DEBUG, "encoding: " + encoding);
     }
 
     /** */
@@ -103,11 +107,11 @@ Debug.println(Level.FINE, "encoding: " + encoding);
     public final void setLongName(Collection<LongNameFileEntry> longNames) {
         StringBuilder sb = new StringBuilder();
         for (LongNameFileEntry entry : longNames) {
-Debug.println(Level.FINE, "subEntryNo: " + entry.subEntryNo + ", " + entry.isLast + ", " + entry.filename);
+logger.log(Level.DEBUG, "subEntryNo: " + entry.subEntryNo + ", " + entry.isLast + ", " + entry.filename);
             sb.append(entry.filename);
         }
         longName = sb.toString();
-Debug.println(Level.FINE, "longName: " + longName + ", " + longNames.size() + ", " + filename);
+logger.log(Level.DEBUG, "longName: " + longName + ", " + longNames.size() + ", " + filename);
     }
 
     @Override

@@ -6,11 +6,13 @@
 
 package vavix.io.partition;
 
-import java.util.logging.Level;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 
-import vavi.util.Debug;
 import vavi.util.serdes.Element;
 import vavi.util.serdes.Serdes;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -23,6 +25,8 @@ import vavi.util.serdes.Serdes;
  */
 @Serdes(bigEndian = false)
 public class PC98PartitionEntry {
+
+    private static final Logger logger = getLogger(PC98PartitionEntry.class.getName());
 
     /**
      * <pre>
@@ -123,7 +127,7 @@ public class PC98PartitionEntry {
 //        if (!Arrays.asList("MS-DOS", "Windows 95").contains(string)) {
 //            return false;
 //        }
-Debug.println(Level.FINE, "name: " + string);
+logger.log(Level.DEBUG, "name: " + string);
         return true;
     }
 }

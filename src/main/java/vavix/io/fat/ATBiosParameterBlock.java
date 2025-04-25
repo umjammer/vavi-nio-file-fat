@@ -8,12 +8,14 @@ package vavix.io.fat;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.Arrays;
-import java.util.logging.Level;
 
-import vavi.util.Debug;
 import vavi.util.serdes.Element;
 import vavi.util.serdes.Serdes;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -24,6 +26,9 @@ import vavi.util.serdes.Serdes;
  */
 @Serdes(bigEndian = false)
 public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
+
+    private static final Logger logger = getLogger(ATBiosParameterBlock.class.getName());
+
     /** */
     @Serial
     private static final long serialVersionUID = -1066456664696979810L;
@@ -253,7 +258,7 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
             case Fat16Fat, Fat12Fat ->
                     cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
         };
-        Debug.printf(Level.FINE, "cluster: %d -> sector: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d, bytesPerSector: %d", cluster, sector, firstDataSector, rootDirSectors, sectorsPerCluster, bytesPerSector);
+logger.log(Level.DEBUG, "cluster: %d -> sector: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d, bytesPerSector: %d".formatted(cluster, sector, firstDataSector, rootDirSectors, sectorsPerCluster, bytesPerSector));
         return sector;
     }
 

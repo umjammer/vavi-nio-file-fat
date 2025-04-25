@@ -10,10 +10,11 @@ import java.io.DataInput;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
 
-import vavi.util.Debug;
+import static java.lang.System.getLogger;
 
 
 /**
@@ -33,6 +34,8 @@ import vavi.util.Debug;
  * @version 0.00 2022/02/07 umjammer initial version <br>
  */
 class LongNameFileEntry implements Comparable<LongNameFileEntry>, Serializable {
+
+    private static final Logger logger = getLogger(LongNameFileEntry.class.getName());
 
     @Serial
     private static final long serialVersionUID = 1640728749170150017L;
@@ -73,7 +76,7 @@ class LongNameFileEntry implements Comparable<LongNameFileEntry>, Serializable {
         if (p != -1) {
             filename = filename.substring(0, p);
         }
-Debug.println(Level.FINE, "subEntryNo: " + subEntryNo + ", " + isLast + ", " + filename);
+logger.log(Level.DEBUG, "subEntryNo: " + subEntryNo + ", " + isLast + ", " + filename);
     }
 
     @Override
