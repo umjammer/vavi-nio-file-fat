@@ -20,20 +20,20 @@
 //-----------------------------------------------------------------------------
 
 /**
- * アーカイブのハンドルを取得します。
+ * Gets file handle.
  * @return NativeGcaArchive#instance
  */
 /** */
 #define getDriveHandle(env,obj) getIntField((env),(obj),"handle")
 
 /**
- * bytesPerSector を取得します。
+ * Gets bytesPerSector.
  * @return NativeGcaArchive#instance
  */
 #define getBytesPerSector(env,obj) getIntField((env),(obj),"bytesPerSector")
 
 /**
- * int 型のフィールド値を取得します。
+ * Gets int type field.
  */
 static jint getIntField(JNIEnv *env, jobject obj, char *name) {
     jclass class = (*env)->GetObjectClass(env, obj);
@@ -42,7 +42,7 @@ static jint getIntField(JNIEnv *env, jobject obj, char *name) {
 }
 
 /**
- * 例外を投げます。
+ * Throws an exception.
  * @param exception "java/lang/Exception"
  */
 static void throwExceptionWithStringMessage(JNIEnv *env, char *exception, char *_message) {
@@ -150,5 +150,3 @@ JNIEXPORT void JNICALL Java_vavix_io_RawIO_close(JNIEnv *env, jobject obj) {
         return;
     }
 }
-
-/* */

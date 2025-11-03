@@ -6,7 +6,6 @@
 
 package vavix.io.fat;
 
-import java.io.InputStream;
 import java.util.Collection;
 
 
@@ -35,5 +34,3 @@ public interface FileEntry {
 
     long lastAccessed();
 }
-
-/* */

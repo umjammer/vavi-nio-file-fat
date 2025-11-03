@@ -30,6 +30,7 @@ import vavix.io.fat.FileEntry;
  * @version 0.00 2006/01/13 nsano initial version <br>
  */
 public class fat32_6 {
+
     /**
      * search word in cluster
      * @param args 0:device
@@ -59,7 +60,7 @@ public class fat32_6 {
     /** */
     Comparator<DeletedEntryImpl> lastAccessedComparator = (o1, o2) -> (int) (o1.lastAccessed() / (1000 * 60 * 60 * 24) - o2.lastAccessed() / (1000 * 60 * 60 * 24));
 
-    /** */
+//    /** */
 //    FindingStrategy continuousClustersFindingStrategy = new FindingStrategy() {
 //        public List<Integer> getClusterList(int startCluster) {
 //            List<Integer> clusters;
@@ -138,5 +139,3 @@ System.err.println("DIR: " + path);
         }
     }
 }
-
-/* */

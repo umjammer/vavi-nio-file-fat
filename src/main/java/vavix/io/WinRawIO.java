@@ -10,7 +10,7 @@ import java.io.IOException;
 
 
 /**
- * WinRawIO.
+ * Deals a disk drive mounted by Windows using WIN32 API via JNI.
  *
  * @author <a href="vavivavi@yahoo.co.jp">Naohide Sano</a> (nsano)
  * @version 0.00 060108 nsano initial version <br>
@@ -44,11 +44,6 @@ public class WinRawIO implements IOSource {
         return bytesPerSector;
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        close();
-    }
-
     //---- native access ----
 
     /** set by jni */
@@ -77,5 +72,3 @@ public class WinRawIO implements IOSource {
         System.loadLibrary("WinRawIO");
     }
 }
-
-/* */

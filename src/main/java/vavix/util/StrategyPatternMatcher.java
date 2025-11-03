@@ -15,15 +15,14 @@ package vavix.util;
  */
 public class StrategyPatternMatcher<S, P extends MatchingStrategy<S, ?>> implements Matcher<P> {
 
-    private S source;
+    private final S source;
 
     public StrategyPatternMatcher(S source) {
         this.source = source;
     }
 
+    @Override
     public int indexOf(P matchingStrategy, int fromIndex) {
         return matchingStrategy.indexOf(source, null);
     }
 }
-
-/* */

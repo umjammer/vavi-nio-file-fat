@@ -18,11 +18,12 @@ import vavi.util.serdes.Serdes;
  */
 @Serdes(bigEndian = false)
 public class ATMasterBootRecord {
-    /** プログラム */
+
+    /** program */
     @Element(sequence = 1)
     byte[] bootStrapCode = new byte[446];
 
-    /** 領域情報 */
+    /** partition information */
     @Element(sequence = 2)
     public ATPartitionEntry[] partitionEntries = new ATPartitionEntry[4];
 
@@ -30,5 +31,3 @@ public class ATMasterBootRecord {
     @Element(sequence = 3, validation = "new byte[] { 0x55, 0xaa }")
     byte[] bootSignature = new byte[2];
 }
-
-/* */

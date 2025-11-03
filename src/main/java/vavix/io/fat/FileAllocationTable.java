@@ -11,8 +11,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,17 +26,17 @@ import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import vavi.io.LittleEndianDataInputStream;
-import vavi.util.Debug;
 import vavi.util.StringUtil;
 import vavi.util.serdes.Serdes;
 import vavix.io.IOSource;
 import vavix.util.Matcher;
 import vavix.util.MatchingStrategy;
 import vavix.util.StrategyPatternMatcher;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -44,7 +47,9 @@ import vavix.util.StrategyPatternMatcher;
  */
 public class FileAllocationTable implements Serializable {
 
-    /** */
+    private static final Logger logger = getLogger(FileAllocationTable.class.getName());
+
+    @Serial
     private static final long serialVersionUID = -3299419883884944569L;
 
     /** */
@@ -154,7 +159,7 @@ public class FileAllocationTable implements Serializable {
     }
 
     /** &gt;path, directory&lt; */
-    private static Map<String, DirectoryEntry> entriesMap = new HashMap<>();
+    private static final Map<String, DirectoryEntry> entriesMap = new HashMap<>();
 
     /**
      * The entry point.
@@ -166,7 +171,7 @@ public class FileAllocationTable implements Serializable {
             path = path.substring(2);
         }
         path = path.replaceFirst("\\\\$", "");
-Debug.println(Level.FINEST, "**** path: [" + path + "]");
+logger.log(Level.TRACE, "**** path: [" + path + "]");
         DirectoryEntry directory = entriesMap.get(path);
         if (directory != null) {
             return directory;
@@ -174,28 +179,28 @@ Debug.println(Level.FINEST, "**** path: [" + path + "]");
             directory = entriesMap.get("");
             if (directory == null) {
                 directory = new DirectoryEntryImpl.RootDosDirectoryEntry(getDirectoryEntry(bpb.getStartClusterOfRootDirectory()));
-Debug.println(Level.FINEST, "**** directory: \\ (" + bpb.getStartClusterOfRootDirectory() + "): " + directory.entries());
+logger.log(Level.TRACE, "**** directory: \\ (" + bpb.getStartClusterOfRootDirectory() + "): " + directory.entries());
                 entriesMap.put("", directory);
             }
         }
-        if (path.equals("")) {
-Debug.println(Level.FINEST, "<<<<<<<<<<<: \\: " + directory.entries());
+        if (path.isEmpty()) {
+logger.log(Level.TRACE, "<<<<<<<<<<<: \\: " + directory.entries());
             return directory;
         }
         StringTokenizer st = new StringTokenizer(path, "\\");
         while (st.hasMoreTokens()) {
             String dirName = st.nextToken();
-Debug.println(Level.FINEST, "**** directory: [" + dirName + "]: " + directory);
+logger.log(Level.TRACE, "**** directory: [" + dirName + "]: " + directory);
             directory = (DirectoryEntry) directory.find(dirName);
             if (directory != null) {
                 fillEntries(directory);
-Debug.println(Level.FINEST, "**** directory: " + directory + " (" + directory.getStartCluster() + "): " + directory.entries());
+logger.log(Level.TRACE, "**** directory: " + directory + " (" + directory.getStartCluster() + "): " + directory.entries());
                 entriesMap.put(path + "\\" + dirName, directory);
             } else {
                 throw new IllegalArgumentException("no such directory: " + dirName);
             }
         }
-Debug.println(Level.FINEST, "<<<<<<<<<<<: " + path + ": " + directory.entries());
+logger.log(Level.TRACE, "<<<<<<<<<<<: " + path + ": " + directory.entries());
         return directory;
     }
 
@@ -203,25 +208,25 @@ Debug.println(Level.FINEST, "<<<<<<<<<<<: " + path + ": " + directory.entries())
     private List<FileEntry> getDirectoryEntry(int startCluster) throws IOException {
         SortedMap<String, FileEntry> entries = new TreeMap<>();
         Integer[] clusters = fat.getClusterChain(startCluster);
-Debug.println(Level.FINE, "dir clusters: start: " + startCluster + ", " + Arrays.toString(clusters) + ", sector/cluster: " + bpb.getSectorsPerCluster());
+logger.log(Level.DEBUG, "dir clusters: start: " + startCluster + ", " + Arrays.toString(clusters) + ", sector/cluster: " + bpb.getSectorsPerCluster());
 if (clusters.length > 2) {
- Debug.println(Level.WARNING, "clusters is larger than 2" + clusters.length);
+ logger.log(Level.WARNING, "clusters is larger than 2" + clusters.length);
 }
         List<LongNameFileEntry> deletedLongNames = new ArrayList<>();
         SortedSet<LongNameFileEntry> temporaryLongNames = new TreeSet<>();
         for (int cluster : clusters) {
             for (int sector = 0; sector < bpb.getSectorsPerCluster(); sector++) {
-//Debug.println(Level.FINEST, "sector: " + (bpb.toSector(cluster) + sector));
+//logger.log(Level.TRACE, "sector: " + (bpb.toSector(cluster) + sector));
                 byte[] buffer = new byte[1024];
                 io.readSector(buffer, bpb.toSector(cluster) + sector);
                 for (int entry = 0; entry < io.getBytesPerSector() / 32; entry++) {
-//Debug.println(Level.FINEST, "entry:\n" + StringUtil.getDump(buffer, entry * 32, 32));
+//logger.log(Level.TRACE, "entry:\n" + StringUtil.getDump(buffer, entry * 32, 32));
                     DataInput ledi = new LittleEndianDataInputStream(new ByteArrayInputStream(buffer, entry * 32, 32));
                     int firstByte = buffer[entry * 32] & 0xff;
                     int attributeByte = buffer[entry * 32 + 0x0b];
                     switch (firstByte) {
                     case 0x00:
-//Debug.println(Level.FINEST, "none");
+//logger.log(Level.TRACE, "none");
                         break;
                     case 0xe5: { // deleted
                         if (attributeByte == 0x0f) { // long name entry
@@ -230,8 +235,8 @@ if (clusters.length > 2) {
                             deletedLongNames.add(0, fileEntry);
                         } else {
                             DeletedEntry fileEntry = new DeletedEntryImpl(ledi);
-//Debug.println(Level.FINEST, StringUtil.paramString(fileEntry));
-                            if (deletedLongNames.size() != 0) {
+//logger.log(Level.TRACE, StringUtil.paramString(fileEntry));
+                            if (!deletedLongNames.isEmpty()) {
                                 fileEntry.setLongName(deletedLongNames);
                                 deletedLongNames.clear();
                             }
@@ -247,12 +252,12 @@ if (clusters.length > 2) {
                         if (attributeByte == 0x0f) { // long name entry
                             // we assume LFNs for a SFN are located just before SFN
                             LongNameFileEntry fileEntry = new LongNameFileEntry(ledi);
-//Debug.println(Level.FINEST, StringUtil.paramString(fileEntry));
+//logger.log(Level.TRACE, StringUtil.paramString(fileEntry));
                             temporaryLongNames.add(fileEntry);
                         } else {
                             FileEntry fileEntry = new FileEntryImpl(ledi);
-//Debug.println(Level.FINEST, StringUtil.paramString(fileEntry));
-                            if (temporaryLongNames.size() != 0) {
+//logger.log(Level.TRACE, StringUtil.paramString(fileEntry));
+                            if (!temporaryLongNames.isEmpty()) {
                                 fileEntry.setLongName(temporaryLongNames);
                                 temporaryLongNames.clear();
                             }
@@ -269,7 +274,7 @@ if (clusters.length > 2) {
             }
         }
 //for (String name : entries.keySet()) {
-// Debug.printf(Level.FINEST, "%s: %d, %08x\n", name, entries.get(name).getStartCluster(), entries.get(name).getStartCluster());
+// logger.log(Level.TRACE, "%s: %d, %08x".formatted(name, entries.get(name).getStartCluster(), entries.get(name).getStartCluster()));
 //}
         return new ArrayList<>(entries.values());
     }
@@ -278,14 +283,14 @@ if (clusters.length > 2) {
     public FileAllocationTable(IOSource io) throws IOException {
         this.io = io;
         int bps = io.getBytesPerSector();
-Debug.println(Level.FINE, "bps: " + bps);
+logger.log(Level.DEBUG, "bps: " + bps);
         byte[] bytes = new byte[bps];
         io.readSector(bytes, 0);
         bpb = new ATBiosParameterBlock();
         Serdes.Util.deserialize(new ByteArrayInputStream(bytes), bpb);
-Debug.println(Level.FINE, "bpb: " + bpb);
+logger.log(Level.DEBUG, "bpb: " + bpb);
         fat = bpb.getFatType();
-Debug.println(Level.FINE, "fat: " + fat);
+logger.log(Level.DEBUG, "fat: " + fat);
         ((FatType) fat).setRuntimeContext(io, bpb);
     }
 
@@ -294,7 +299,7 @@ Debug.println(Level.FINE, "fat: " + fat);
         this.io = io;
         this.bpb = bpb;
         fat = bpb.getFatType();
-Debug.println(Level.FINE, "fat: " + fat);
+logger.log(Level.DEBUG, "fat: " + fat);
         ((FatType) fat).setRuntimeContext(io, bpb);
     }
 
@@ -307,7 +312,7 @@ Debug.println(Level.FINE, "fat: " + fat);
         for (int cluster : clusterChain) {
             int l = readCluster(buf, cluster);
 //if (cluster == clusterChain[0]) {
-// Debug.println(Level.FINE, "start cluster: " + cluster + " = sector: " + bpb.toSector(cluster) + ", " + + l + " bytes\n" + StringUtil.getDump(buf, 64));
+// logger.log(Level.DEBUG, "start cluster: " + cluster + " = sector: " + bpb.toSector(cluster) + ", " + + l + " bytes\n" + StringUtil.getDump(buf, 64));
 //}
             if (cluster == clusterChain[clusterChain.length - 1]) {
                 l = (int) (entry.length() % bytesPerCluster);
@@ -317,5 +322,3 @@ Debug.println(Level.FINE, "fat: " + fat);
         return new ByteArrayInputStream(baos.toByteArray());
     }
 }
-
-/* */

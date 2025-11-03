@@ -6,13 +6,16 @@
 
 package vavix.io.fat;
 
+import java.io.Serial;
 import java.io.Serializable;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.Arrays;
-import java.util.logging.Level;
 
-import vavi.util.Debug;
 import vavi.util.serdes.Element;
 import vavi.util.serdes.Serdes;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -23,7 +26,11 @@ import vavi.util.serdes.Serdes;
  */
 @Serdes(bigEndian = false)
 public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
+
+    private static final Logger logger = getLogger(ATBiosParameterBlock.class.getName());
+
     /** */
+    @Serial
     private static final long serialVersionUID = -1066456664696979810L;
     @Element(sequence = 1)
     byte[] jump = new byte[3];
@@ -96,13 +103,13 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
         @Element(sequence = 4)
         int volumeSerialID;
         @Element(sequence = 5, value = "11")
-        String volumeLavel;
+        String volumeLabel;
         @Element(sequence = 6, value = "8")
         String fileSystemType;
         @Override
         public String toString() {
-            return String.format("Fat [driveNumber=%s, b1=%s, bootSignature=%s, volumeSerialID=%s, volumeLavel=%s, fileSystemType=%s]",
-                            driveNumber, b1, bootSignature, volumeSerialID, volumeLavel, fileSystemType);
+            return String.format("Fat [driveNumber=%s, b1=%s, bootSignature=%s, volumeSerialID=%s, volumeLabel=%s, fileSystemType=%s]",
+                            driveNumber, b1, bootSignature, volumeSerialID, volumeLabel, fileSystemType);
         }
     }
 
@@ -146,7 +153,7 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
         public String toString() {
             return String.format("Fat32 [mediaDescriptionFlag=%s, fileSystemVersion=%s, startClusterOfRootDirectory=%s, " +
                             "sectorOfFSInfo=%s, sectorOfCopyBootSector=%s, b3=%s, physicalDriveNumber=%s, b4=%s, bootSignature=%s, " +
-                            "volumeSerialID=%s, volumeLavel=%s, fileSystemType=%s]",
+                            "volumeSerialID=%s, volumeLabel=%s, fileSystemType=%s]",
                             mediaDescriptionFlag, fileSystemVersion, startClusterOfRootDirectory, sectorOfFSInfo,
                             sectorOfCopyBootSector, Arrays.toString(b3), physicalDriveNumber, b4,
                             bootSignature, volumeSerialID, volumeLavel, fileSystemType);
@@ -198,14 +205,11 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
             break;
         }
 
-        switch (sequence) {
-        case 16:
-            return type == FatType.Fat32Fat;
-        case 17:
-            return type != FatType.Fat32Fat;
-        default:
-            return false;
-        }
+        return switch (sequence) {
+            case 16 -> type == FatType.Fat32Fat;
+            case 17 -> type != FatType.Fat32Fat;
+            default -> false;
+        };
     }
 
     @Override
@@ -249,18 +253,12 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
     /** using jnode algorithm */
     @Override
     public int toSector(int cluster) {
-        int sector;
-        switch (type) {
-        case Fat32Fat:
-        default:
-            sector = (cluster - 2) * sectorsPerCluster + firstDataSector;
-            break;
-        case Fat16Fat:
-        case Fat12Fat:
-            sector = cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
-            break;
-        }
-Debug.printf(Level.FINE, "cluster: %d -> sector: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d, bytesPerSector: %d", cluster, sector, firstDataSector, rootDirSectors, sectorsPerCluster, bytesPerSector);
+        int sector = switch (type) {
+            default -> (cluster - 2) * sectorsPerCluster + firstDataSector;
+            case Fat16Fat, Fat12Fat ->
+                    cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
+        };
+logger.log(Level.DEBUG, "cluster: %d -> sector: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d, bytesPerSector: %d".formatted(cluster, sector, firstDataSector, rootDirSectors, sectorsPerCluster, bytesPerSector));
         return sector;
     }
 
@@ -276,5 +274,3 @@ Debug.printf(Level.FINE, "cluster: %d -> sector: %d, firstDataSector: %d, rootDi
         return type;
     }
 }
-
-/* */

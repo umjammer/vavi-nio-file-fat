@@ -33,5 +33,3 @@ public interface IOSource {
      */
     void setOffset(long offset);
 }
-
-/* */

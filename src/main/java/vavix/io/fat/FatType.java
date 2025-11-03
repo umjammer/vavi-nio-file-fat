@@ -7,15 +7,17 @@
 package vavix.io.fat;
 
 import java.io.IOException;
+import java.io.Serial;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import vavi.util.ByteUtil;
-import vavi.util.Debug;
 import vavi.util.StringUtil;
-
 import vavix.io.IOSource;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -25,6 +27,7 @@ import vavix.io.IOSource;
  * @version 0.00 2022/02/07 umjammer initial version <br>
  */
 public enum FatType implements Fat {
+
     /**
      * <li>0000_0000h               unused cluster
      * <li>0000_0002h ~ 0fff_fff6h  next cluster for a file
@@ -32,7 +35,7 @@ public enum FatType implements Fat {
      * <li>0fff_fff8h ~ 0fff_ffffh  last cluster for a file (used 0fff_ffffh normally)
      */
     Fat32Fat(32) {
-        /** */
+        @Serial
         private static final long serialVersionUID = -8008307331300948383L;
         @Override
         protected int nextCluster(int cluster) throws IOException {
@@ -42,9 +45,9 @@ public enum FatType implements Fat {
                 currentFatSector = fatSector;
             }
             int position = (cluster * 4) % bpb.getBytesPerSector();
-Debug.println(Level.FINER, "fatSector: " + fatSector + ", position: " + position + "\n" + StringUtil.getDump(buffer, position, 16));
+logger.log(Level.TRACE, "fatSector: " + fatSector + ", position: " + position + "\n" + StringUtil.getDump(buffer, position, 16));
             int nextCluster = ByteUtil.readLeInt(buffer, position);
-Debug.printf(Level.FINER, "cluster: %1$d, fatSector: %2$d, position: %3$d, %3$08x, next: %4$d%n", cluster, fatSector, position, nextCluster);
+logger.log(Level.TRACE, "cluster: %1$d, fatSector: %2$d, position: %3$d, %3$08x, next: %4$d".formatted(cluster, fatSector, position, nextCluster));
             return nextCluster;
         }
 
@@ -52,7 +55,7 @@ Debug.printf(Level.FINER, "cluster: %1$d, fatSector: %2$d, position: %3$d, %3$08
         public Integer[] getClusterChain(int cluster) throws IOException {
             List<Integer> clusters = new ArrayList<>();
             do {
-Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
+logger.log(Level.TRACE, "cluster: %08x".formatted(cluster));
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
             } while (0x0000_0002 <= cluster && cluster <= 0x0fff_fff6);
@@ -62,12 +65,12 @@ Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
         @Override
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
-Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
+logger.log(Level.TRACE, "cluster: %08x".formatted(cluster));
             return 0x0000_0002 <= cluster && cluster <= 0x0fff_ffff;
         }
     },
     Fat16Fat(16) {
-        /** */
+        @Serial
         private static final long serialVersionUID = 1846975683407080677L;
 
         @Override
@@ -78,9 +81,9 @@ Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
                 currentFatSector = sector;
             }
             int position = (cluster * 2) % bpb.getBytesPerSector();
-Debug.println(Level.FINER, "sector: " + sector + ", position: " + position + "\n" + StringUtil.getDump(buffer, position, 8));
+logger.log(Level.TRACE, "sector: " + sector + ", position: " + position + "\n" + StringUtil.getDump(buffer, position, 8));
             int nextCluster = ByteUtil.readLeShort(buffer, position) & 0xffff;
-Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$04x, next: %4$d%n", cluster, sector, position, (nextCluster & 0xfff8) > 0 ? -1 : nextCluster);
+logger.log(Level.TRACE, "cluster: %1$d, sector: %2$d, position: %3$d, %3$04x, next: %4$d".formatted(cluster, sector, position, (nextCluster & 0xfff8) > 0 ? -1 : nextCluster));
             return nextCluster;
         }
 
@@ -88,7 +91,7 @@ Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$04x, 
         public Integer[] getClusterChain(int cluster) throws IOException {
             List<Integer> clusters = new ArrayList<>();
             do {
-Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
+logger.log(Level.TRACE, "cluster: %08x".formatted(cluster));
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
             } while (0x0002 <= cluster && cluster <= 0xfff6);
@@ -98,12 +101,12 @@ Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
         @Override
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
-Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
+logger.log(Level.TRACE, "cluster: %08x".formatted(cluster));
             return 0x0002 <= cluster && cluster <= 0xffff;
         }
     },
     Fat12Fat(12) {
-        /** */
+        @Serial
         private static final long serialVersionUID = -3706950356198032944L;
 
         @Override
@@ -124,9 +127,9 @@ Debug.printf(Level.FINER, "cluster: %08x\n", cluster);
             } else {
                 temp = ByteUtil.readLeShort(buffer, position);
             }
-//Debug.println(Level.FINE, "sector: " + sector + ", position: " + position + "\n" + StringUtil.getDump(buffer, position, 6));
+//logger.log(Level.DEBUG, "sector: " + sector + ", position: " + position + "\n" + StringUtil.getDump(buffer, position, 6));
             int nextCluster = (temp >> ((cluster & 1) != 0 ? 4 : 0)) & 0x0fff;
-Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, next: %3$d%n", cluster, sector, position, nextCluster);
+logger.log(Level.TRACE, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, next: %4$d".formatted(cluster, sector, position, nextCluster));
             return nextCluster;
         }
 
@@ -134,7 +137,7 @@ Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, 
         public Integer[] getClusterChain(int cluster) throws IOException {
             List<Integer> clusters = new ArrayList<>();
             do {
-//Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
+//logger.log(Level.DEBUG, "cluster: %08x".formatted(cluster));
                 clusters.add(cluster);
                 cluster = nextCluster(cluster);
             } while (0x002 <= cluster && cluster <= 0xff6);
@@ -144,17 +147,19 @@ Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, 
         @Override
         public boolean isUsing(int cluster) throws IOException {
             cluster = nextCluster(cluster);
-//Debug.printf(Level.FINE, "cluster: %08x\n", cluster);
+//logger.log(Level.DEBUG, "cluster: %08x".formatted(cluster));
             return 0x002 <= cluster && cluster <= 0xfff;
         }
     };
+
+    private static final Logger logger = getLogger(FatType.class.getName());
 
     protected IOSource io;
 
     protected BiosParameterBlock bpb;
 
     /**
-     * ⚠⚠⚠ CAUTION ⚠⚠⚠ This enum doesn't work without those parameters.
+     * ⚠️⚠️⚠️ CAUTION ⚠️⚠️⚠️ This enum doesn't work without those parameters.
      */
     public void setRuntimeContext(IOSource io, BiosParameterBlock bpb) {
         this.io = io;
@@ -186,17 +191,18 @@ Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, 
      */
     protected abstract int nextCluster(int cluster) throws IOException;
 
-    /** */
+    @Override
     public void setClusterValue(int cluster, int value) throws IOException {
         throw new UnsupportedOperationException("read only, use #useUserFat()");
     }
 
     /** TODO thread unsafe */
+    @Override
     public int getClusterValue(int cluster) throws IOException {
         return nextCluster(cluster);
     }
 
-    /** */
+    @Override
     public void setClusterChain(Integer[] clusters) throws IOException {
         throw new UnsupportedOperationException("read only, use #useUserFat()");
     }
@@ -212,5 +218,3 @@ Debug.printf(Level.FINER, "cluster: %1$d, sector: %2$d, position: %3$d, %3$08x, 
         return fatSize;
     }
 }
-
-/* */

@@ -8,17 +8,20 @@ package vavix.io.fat;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
-import java.util.logging.Level;
 
-import vavi.util.Debug;
 import vavi.util.win32.DateUtil;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -32,15 +35,17 @@ import vavi.util.win32.DateUtil;
  */
 public class FileEntryImpl implements FileEntry, Serializable, Comparable<FileEntry>{
 
-    /** */
+    private static final Logger logger = getLogger(FileEntryImpl.class.getName());
+
+    @Serial
     private static final long serialVersionUID = 1003655836319404523L;
 
     /** file name encoding */
-    private static String encoding;
+    private static final String encoding;
 
     static {
         encoding = System.getProperty("vavix.io.fat.FileEntry.encoding", "ISO_8859_1");
-Debug.println(Level.FINE, "encoding: " + encoding);
+logger.log(Level.DEBUG, "encoding: " + encoding);
     }
 
     /** */
@@ -71,7 +76,7 @@ Debug.println(Level.FINE, "encoding: " + encoding);
         leis.readFully(b1);
         filename = getPrefixString() + new String(b1, getPrefixString().length(), 8 - getPrefixString().length(), Charset.forName(encoding)).trim();
         String extension = new String(b1, 8, 3, Charset.forName(encoding)).trim();
-        filename += extension.length() > 0 ? '.' + extension : "";
+        filename += !extension.isEmpty() ? '.' + extension : "";
 //Debug.println("filename: [" + filename + "], [" + extension + "]: " + extension.length());
         attribute = leis.readUnsignedByte();
         capitalFlag = leis.readUnsignedByte();
@@ -102,11 +107,11 @@ Debug.println(Level.FINE, "encoding: " + encoding);
     public final void setLongName(Collection<LongNameFileEntry> longNames) {
         StringBuilder sb = new StringBuilder();
         for (LongNameFileEntry entry : longNames) {
-Debug.println(Level.FINE, "subEntryNo: " + entry.subEntryNo + ", " + entry.isLast + ", " + entry.filename);
+logger.log(Level.DEBUG, "subEntryNo: " + entry.subEntryNo + ", " + entry.isLast + ", " + entry.filename);
             sb.append(entry.filename);
         }
         longName = sb.toString();
-Debug.println(Level.FINE, "longName: " + longName + ", " + longNames.size() + ", " + filename);
+logger.log(Level.DEBUG, "longName: " + longName + ", " + longNames.size() + ", " + filename);
     }
 
     @Override
@@ -138,12 +143,12 @@ Debug.println(Level.FINE, "longName: " + longName + ", " + longNames.size() + ",
         return lastModified.getTime();
     }
 
-    /** */
+    @Override
     public long lastAccessed() {
         return lastAccessed.getTime();
     }
 
-    /** */
+    @Override
     public long created() {
         return created.getTime();
     }
@@ -153,5 +158,3 @@ Debug.println(Level.FINE, "longName: " + longName + ", " + longNames.size() + ",
         return getName() + ", " + length() + ", " + LocalDateTime.ofInstant(Instant.ofEpochMilli(lastModified()), ZoneId.of("+9"));
     }
 }
-
-/* */

@@ -6,12 +6,14 @@
 
 package vavix.io.fat;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.Arrays;
-import java.util.logging.Level;
 
-import vavi.util.Debug;
 import vavi.util.serdes.Element;
 import vavi.util.serdes.Serdes;
+
+import static java.lang.System.getLogger;
 
 
 /**
@@ -22,6 +24,8 @@ import vavi.util.serdes.Serdes;
  */
 @Serdes(bigEndian = false, encoding = "MS932")
 public class PC98BiosParameterBlock implements BiosParameterBlock {
+
+    private static final Logger logger = getLogger(PC98BiosParameterBlock.class.getName());
 
     @Element(sequence = 1)
     byte[] jump = new byte[3];
@@ -127,7 +131,7 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
 //        if (!oemLabel.startsWith("NEC")) {
 //            return false;
 //        }
-Debug.println(Level.FINE, "oemLabel: " + oemLabel);
+logger.log(Level.DEBUG, "oemLabel: " + oemLabel);
         return true;
     }
 
@@ -148,7 +152,7 @@ Debug.println(Level.FINE, "oemLabel: " + oemLabel);
 
     @Override
     public int getFatStartSector(int fatNumber) {
-Debug.printf(Level.FINER, "reservedSectors: %d, fatNumber: %d, numberOfFATSector: %d, result: %d%n", reservedSectors, fatNumber, numberOfFATSector, reservedSectors + fatNumber * numberOfFATSector);
+logger.log(Level.TRACE, "reservedSectors: %d, fatNumber: %d, numberOfFATSector: %d, result: %d".formatted(reservedSectors, fatNumber, numberOfFATSector, reservedSectors + fatNumber * numberOfFATSector));
         return reservedSectors + fatNumber * numberOfFATSector;
     }
 
@@ -160,18 +164,12 @@ Debug.printf(Level.FINER, "reservedSectors: %d, fatNumber: %d, numberOfFATSector
     // TODO same as the AT's
     @Override
     public int toSector(int cluster) {
-        int sector;
-        switch (type) {
-        case Fat32Fat:
-        default:
-            sector = (cluster - 2) * sectorsPerCluster + firstDataSector;
-            break;
-        case Fat16Fat:
-        case Fat12Fat:
-            sector = cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
-            break;
-        }
-Debug.printf(Level.FINE, "cluster: %d -> sector: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d, bytesPerSector: %d, distinguish root threshold: %d", cluster, sector, firstDataSector, rootDirSectors, sectorsPerCluster, bytesPerSector, rootDirSectors / sectorsPerCluster);
+        int sector = switch (type) {
+            default -> (cluster - 2) * sectorsPerCluster + firstDataSector;
+            case Fat16Fat, Fat12Fat ->
+                    cluster == 0 ? firstDataSector : firstDataSector + rootDirSectors + (cluster - 2) * sectorsPerCluster;
+        };
+logger.log(Level.DEBUG, "cluster: %d -> sector: %d, firstDataSector: %d, rootDirSectors: %d, sectorsPerCluster: %d, bytesPerSector: %d, distinguish root threshold: %d".formatted(cluster, sector, firstDataSector, rootDirSectors, sectorsPerCluster, bytesPerSector, rootDirSectors / sectorsPerCluster));
         return sector;
     }
 
@@ -192,5 +190,3 @@ Debug.printf(Level.FINE, "cluster: %d -> sector: %d, firstDataSector: %d, rootDi
         return type;
     }
 }
-
-/* */
