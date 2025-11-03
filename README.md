@@ -10,7 +10,7 @@
 
 🌏 mount the old school world!
 
-## Status
+### Status
 
 | fs         | list | upload | download | copy | move | rm | mkdir | cache |
 |------------|------|--------|----------|------|------|----|-------|-------|
@@ -23,6 +23,12 @@
 ## Install
 
  * [jitpack](https://jitpack.io/#umjammer/vavi-nio-file-fat)
+
+## Usage
+
+### sample
+
+ * [fat32 formated iPod salvage](src/test/java/ipod)
 
 ## References
 
