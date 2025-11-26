@@ -23,6 +23,7 @@ import static java.lang.System.getLogger;
  *
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/02/07 umjammer initial version <br>
+ * @see "http://elm-chan.org/docs/fat.html"
  */
 @Serdes(bigEndian = false)
 public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
@@ -32,6 +33,7 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
     /** */
     @Serial
     private static final long serialVersionUID = -1066456664696979810L;
+
     @Element(sequence = 1)
     byte[] jump = new byte[3];
     /** OEM name */
@@ -82,7 +84,7 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
     @Element(sequence = 14)
     public int numberOfLargeSectors;
 
-    /** */
+    /** when {@link #numberOfFATSector} is 0 */
     @Element(sequence = 15, condition = "condition1")
     int sectorsPerFAT;
 
@@ -160,17 +162,26 @@ public class ATBiosParameterBlock implements BiosParameterBlock, Serializable {
         }
     }
 
+    /** for {@link #sectorsPerFAT} */
     public boolean condition1(int sequence) {
         return numberOfFATSector == 0;
     }
 
+    /** @after #condition1 */
     private int fatSize;
 
+    /** @after #condition1 */
     private int firstDataSector;
 
+    /** @after #condition1 */
     private int rootDirSectors;
 
-    /** using jnode algorithm */
+    /**
+     * for {@link Element#condition()}.
+     * using jnode algorithm.
+     *
+     * @return is 32bit fat or not
+     */
     public boolean condition2(int sequence) {
         rootDirSectors = ((maxRootDirectoryEntries * 32) + (bytesPerSector - 1)) / bytesPerSector;
 
@@ -267,6 +278,7 @@ logger.log(Level.DEBUG, "cluster: %d -> sector: %d, firstDataSector: %d, rootDir
         return fatSize;
     }
 
+    /** fat type by bits */
     private FatType type;
 
     @Override
