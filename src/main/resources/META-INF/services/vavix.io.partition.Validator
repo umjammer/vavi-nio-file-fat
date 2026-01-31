@@ -1,0 +1,4 @@
+vavix.io.partition.validator.FatValidator
+vavix.io.partition.validator.IplValidator
+vavix.io.partition.validator.MagicValidator
+vavix.io.partition.validator.NecValidator

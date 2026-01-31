@@ -8,6 +8,7 @@ package vavix.io.fat;
 
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import vavi.util.serdes.Element;
@@ -18,7 +19,10 @@ import static java.lang.System.getLogger;
 
 /**
  * PC98BiosParameterBlock.
- *
+ * <p>
+ * system property
+ * <li>{@code vavix.io.fat.PC98BiosParameterBlock.validation} ... {@code class#method}, {@code true}, {@code false}, default {@code false}</li>
+ * </p>
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2022/02/07 umjammer initial version <br>
  */
@@ -126,13 +130,39 @@ public class PC98BiosParameterBlock implements BiosParameterBlock {
                 volumeLabel, fileSystem);
     }
 
-    // TODO
+    /**
+     * true: do default validation,
+     * false: no validation,
+     * else: validation function name "class#method", the method must return boolean and
+     *       w/ an argument PC98BiosParameterBlock and static.
+     */
+    public static final String VALIDATION_KEY = "vavix.io.fat.PC98BiosParameterBlock.validation";
+
+    /** @see #VALIDATION_KEY */
     public boolean validate() {
-//        if (!oemLabel.startsWith("NEC")) {
-//            return false;
-//        }
-logger.log(Level.DEBUG, "oemLabel: " + oemLabel);
-        return true;
+        String validation = System.getProperty(VALIDATION_KEY, "true");
+        if (Boolean.parseBoolean(validation)) {
+logger.log(Level.DEBUG, "default validation");
+            return this.fileSystem.contains("FAT");
+        } else if (validation.equalsIgnoreCase("false")) {
+logger.log(Level.DEBUG, "no validation, accepting anyway");
+            return true;
+        } else {
+            try {
+                String[] parts = validation.split("#");
+                Class<?> clazz = Class.forName(parts[0]);
+                Method method = clazz.getDeclaredMethod(parts[1], PC98BiosParameterBlock.class);
+                if (method.getReturnType() != Boolean.TYPE) {
+                    throw new IllegalArgumentException("method %s return type is not boolean but %s".formatted(method.getName(), method.getReturnType().getName()));
+                }
+                boolean r = method.invoke(null, this).equals(Boolean.TRUE);
+logger.log(Level.DEBUG, "do user bpb validation %s#%s: %s".formatted(clazz.getSimpleName(), method.getName(), r));
+                return r;
+            } catch (Exception e) {
+logger.log(Level.WARNING, "validation function error, accepting anyway", e);
+                return true;
+            }
+        }
     }
 
     @Override
@@ -188,5 +218,14 @@ logger.log(Level.DEBUG, "cluster: %d -> sector: %d, firstDataSector: %d, rootDir
             throw new IllegalStateException("call #compute() first");
         }
         return type;
+    }
+
+    /**
+     * @see "https://github.com/aaru-dps/Aaru.Helpers/blob/4640bb88d3eb907d0f0617d5ee5159fbc13c5653/CHS.cs"
+     */
+    public static int toLBA(int cyl, int head, int sector, int maxHead, int maxSector) {
+//logger.log(Level.DEBUG, "heads: %d, secs: %d".formatted(maxHead, maxSector));
+        return maxHead == 0 || maxSector == 0 ? (((cyl * 16)      + head) * 63)        + sector - 1
+                                              : (((cyl * maxHead) + head) * maxSector) + sector - 1;
     }
 }
