@@ -8,7 +8,7 @@
 
   <groupId>vavi</groupId>
   <artifactId>vavi-nio-file-fat</artifactId>
-  <version>1.0.8</version>
+  <version>1.0.9</version>
 
   <name>java nio file FAT SPI</name>
   <organization>
@@ -132,7 +132,7 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.13.4</version>
+        <version>5.14.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

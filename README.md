@@ -6,7 +6,7 @@
 
 # vavi-nio-file-fat
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Fat32_structure.svg/837px-Fat32_structure.svg.png" width="220" alt="fat icon"/><sub><a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY SA 3.0</a></sub>
+<img alt="logo" src="src/test/resources/duke_fat.png" width="200"/>
 
 🌏 mount the old school world!
 
@@ -22,9 +22,21 @@
 
 ## Install
 
- * [jitpack](https://jitpack.io/#umjammer/vavi-nio-file-fat)
+ * [maven](https://jitpack.io/#umjammer/vavi-nio-file-fat)
 
 ## Usage
+
+
+### bpb validation spi
+
+`src/main/resources/META-INF/services/vavix.io.partition.Validator`
+
+### system properties
+
+<!-- * `discUtils.core.file.encoding` ... filename encoding for `Charset#forName(String)`, default is `MS932` -->
+* `vavix.io.partition.validator.fat` ... validator for finding fat literal default is `false`
+* `vavix.io.partition.validator.ipl` ... validator for finding ipl literal default is `true`
+* `vavix.io.partition.validator.nec` ... validator for finding nec literal, default is `true`
 
 ### sample
 
@@ -39,3 +51,8 @@
 ## TODO
 
  * file entry related class tree is not good
+ * ~~import bpb validation system from jnode and discutils~~
+
+---
+
+<sub>image designed by @umjammer, drawn by nano banana</sub>
